@@ -1,0 +1,495 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		ED5372601DFC28D00066FF5A /* pixelboardd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */; };
+		ED53729B1DFC2CBE0066FF5A /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372671DFC2CBE0066FF5A /* application.cpp */; };
+		ED53729C1DFC2CBE0066FF5A /* colorutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372691DFC2CBE0066FF5A /* colorutils.cpp */; };
+		ED53729D1DFC2CBE0066FF5A /* consolekey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53726B1DFC2CBE0066FF5A /* consolekey.cpp */; };
+		ED53729E1DFC2CBE0066FF5A /* digitalio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53726D1DFC2CBE0066FF5A /* digitalio.cpp */; };
+		ED53729F1DFC2CBE0066FF5A /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53726F1DFC2CBE0066FF5A /* error.cpp */; };
+		ED5372A01DFC2CBE0066FF5A /* fdcomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372711DFC2CBE0066FF5A /* fdcomm.cpp */; };
+		ED5372A11DFC2CBE0066FF5A /* gpio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372731DFC2CBE0066FF5A /* gpio.cpp */; };
+		ED5372A21DFC2CBE0066FF5A /* httpcomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372761DFC2CBE0066FF5A /* httpcomm.cpp */; };
+		ED5372A31DFC2CBE0066FF5A /* i2c.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372781DFC2CBE0066FF5A /* i2c.cpp */; };
+		ED5372A41DFC2CBE0066FF5A /* iopin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53727A1DFC2CBE0066FF5A /* iopin.cpp */; };
+		ED5372A51DFC2CBE0066FF5A /* jsoncomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53727C1DFC2CBE0066FF5A /* jsoncomm.cpp */; };
+		ED5372A61DFC2CBE0066FF5A /* jsonobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53727E1DFC2CBE0066FF5A /* jsonobject.cpp */; };
+		ED5372A71DFC2CBE0066FF5A /* jsonrpccomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372801DFC2CBE0066FF5A /* jsonrpccomm.cpp */; };
+		ED5372A81DFC2CBE0066FF5A /* jsonwebclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372821DFC2CBE0066FF5A /* jsonwebclient.cpp */; };
+		ED5372A91DFC2CBE0066FF5A /* logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372841DFC2CBE0066FF5A /* logger.cpp */; };
+		ED5372AA1DFC2CBE0066FF5A /* mainloop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372861DFC2CBE0066FF5A /* mainloop.cpp */; };
+		ED5372AB1DFC2CBE0066FF5A /* operationqueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372881DFC2CBE0066FF5A /* operationqueue.cpp */; };
+		ED5372AC1DFC2CBE0066FF5A /* p44obj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53728A1DFC2CBE0066FF5A /* p44obj.cpp */; };
+		ED5372AD1DFC2CBE0066FF5A /* persistentparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53728D1DFC2CBE0066FF5A /* persistentparams.cpp */; };
+		ED5372AE1DFC2CBE0066FF5A /* serialcomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53728F1DFC2CBE0066FF5A /* serialcomm.cpp */; };
+		ED5372AF1DFC2CBE0066FF5A /* serialqueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372911DFC2CBE0066FF5A /* serialqueue.cpp */; };
+		ED5372B01DFC2CBE0066FF5A /* socketcomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372931DFC2CBE0066FF5A /* socketcomm.cpp */; };
+		ED5372B11DFC2CBE0066FF5A /* spi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372951DFC2CBE0066FF5A /* spi.cpp */; };
+		ED5372B21DFC2CBE0066FF5A /* sqlite3persistence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372971DFC2CBE0066FF5A /* sqlite3persistence.cpp */; };
+		ED5372B31DFC2CBE0066FF5A /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372991DFC2CBE0066FF5A /* utils.cpp */; };
+		ED5372D51DFC9F720066FF5A /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = ED5372B71DFC9F650066FF5A /* mongoose.c */; };
+		ED5372D61DFC9FC60066FF5A /* sqlite3ppext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372CB1DFC9F650066FF5A /* sqlite3ppext.cpp */; };
+		ED5372D71DFC9FC90066FF5A /* sqlite3pp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372C91DFC9F650066FF5A /* sqlite3pp.cpp */; };
+		ED5372DA1DFCA0CC0066FF5A /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ED5372D91DFCA0CC0066FF5A /* libsqlite3.tbd */; };
+		ED5372DD1DFCA1FF0066FF5A /* ledchaincomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372DB1DFCA1FF0066FF5A /* ledchaincomm.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		ED53725A1DFC28D00066FF5A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		ED53725C1DFC28D00066FF5A /* pixelboardd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pixelboardd; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pixelboardd_main.cpp; sourceTree = "<group>"; };
+		ED5372671DFC2CBE0066FF5A /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
+		ED5372681DFC2CBE0066FF5A /* application.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = application.hpp; sourceTree = "<group>"; };
+		ED5372691DFC2CBE0066FF5A /* colorutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = colorutils.cpp; sourceTree = "<group>"; };
+		ED53726A1DFC2CBE0066FF5A /* colorutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = colorutils.hpp; sourceTree = "<group>"; };
+		ED53726B1DFC2CBE0066FF5A /* consolekey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consolekey.cpp; sourceTree = "<group>"; };
+		ED53726C1DFC2CBE0066FF5A /* consolekey.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = consolekey.hpp; sourceTree = "<group>"; };
+		ED53726D1DFC2CBE0066FF5A /* digitalio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = digitalio.cpp; sourceTree = "<group>"; };
+		ED53726E1DFC2CBE0066FF5A /* digitalio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = digitalio.hpp; sourceTree = "<group>"; };
+		ED53726F1DFC2CBE0066FF5A /* error.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = error.cpp; sourceTree = "<group>"; };
+		ED5372701DFC2CBE0066FF5A /* error.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
+		ED5372711DFC2CBE0066FF5A /* fdcomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fdcomm.cpp; sourceTree = "<group>"; };
+		ED5372721DFC2CBE0066FF5A /* fdcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = fdcomm.hpp; sourceTree = "<group>"; };
+		ED5372731DFC2CBE0066FF5A /* gpio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gpio.cpp; sourceTree = "<group>"; };
+		ED5372741DFC2CBE0066FF5A /* gpio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gpio.h; sourceTree = "<group>"; };
+		ED5372751DFC2CBE0066FF5A /* gpio.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = gpio.hpp; sourceTree = "<group>"; };
+		ED5372761DFC2CBE0066FF5A /* httpcomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = httpcomm.cpp; sourceTree = "<group>"; };
+		ED5372771DFC2CBE0066FF5A /* httpcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = httpcomm.hpp; sourceTree = "<group>"; };
+		ED5372781DFC2CBE0066FF5A /* i2c.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = i2c.cpp; sourceTree = "<group>"; };
+		ED5372791DFC2CBE0066FF5A /* i2c.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = i2c.hpp; sourceTree = "<group>"; };
+		ED53727A1DFC2CBE0066FF5A /* iopin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = iopin.cpp; sourceTree = "<group>"; };
+		ED53727B1DFC2CBE0066FF5A /* iopin.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = iopin.hpp; sourceTree = "<group>"; };
+		ED53727C1DFC2CBE0066FF5A /* jsoncomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsoncomm.cpp; sourceTree = "<group>"; };
+		ED53727D1DFC2CBE0066FF5A /* jsoncomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsoncomm.hpp; sourceTree = "<group>"; };
+		ED53727E1DFC2CBE0066FF5A /* jsonobject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsonobject.cpp; sourceTree = "<group>"; };
+		ED53727F1DFC2CBE0066FF5A /* jsonobject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonobject.hpp; sourceTree = "<group>"; };
+		ED5372801DFC2CBE0066FF5A /* jsonrpccomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsonrpccomm.cpp; sourceTree = "<group>"; };
+		ED5372811DFC2CBE0066FF5A /* jsonrpccomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonrpccomm.hpp; sourceTree = "<group>"; };
+		ED5372821DFC2CBE0066FF5A /* jsonwebclient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jsonwebclient.cpp; sourceTree = "<group>"; };
+		ED5372831DFC2CBE0066FF5A /* jsonwebclient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = jsonwebclient.hpp; sourceTree = "<group>"; };
+		ED5372841DFC2CBE0066FF5A /* logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
+		ED5372851DFC2CBE0066FF5A /* logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = logger.hpp; sourceTree = "<group>"; };
+		ED5372861DFC2CBE0066FF5A /* mainloop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mainloop.cpp; sourceTree = "<group>"; };
+		ED5372871DFC2CBE0066FF5A /* mainloop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mainloop.hpp; sourceTree = "<group>"; };
+		ED5372881DFC2CBE0066FF5A /* operationqueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = operationqueue.cpp; sourceTree = "<group>"; };
+		ED5372891DFC2CBE0066FF5A /* operationqueue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = operationqueue.hpp; sourceTree = "<group>"; };
+		ED53728A1DFC2CBE0066FF5A /* p44obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = p44obj.cpp; sourceTree = "<group>"; };
+		ED53728B1DFC2CBE0066FF5A /* p44obj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44obj.hpp; sourceTree = "<group>"; };
+		ED53728C1DFC2CBE0066FF5A /* p44utils_common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = p44utils_common.hpp; sourceTree = "<group>"; };
+		ED53728D1DFC2CBE0066FF5A /* persistentparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = persistentparams.cpp; sourceTree = "<group>"; };
+		ED53728E1DFC2CBE0066FF5A /* persistentparams.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = persistentparams.hpp; sourceTree = "<group>"; };
+		ED53728F1DFC2CBE0066FF5A /* serialcomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serialcomm.cpp; sourceTree = "<group>"; };
+		ED5372901DFC2CBE0066FF5A /* serialcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = serialcomm.hpp; sourceTree = "<group>"; };
+		ED5372911DFC2CBE0066FF5A /* serialqueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serialqueue.cpp; sourceTree = "<group>"; };
+		ED5372921DFC2CBE0066FF5A /* serialqueue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = serialqueue.hpp; sourceTree = "<group>"; };
+		ED5372931DFC2CBE0066FF5A /* socketcomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socketcomm.cpp; sourceTree = "<group>"; };
+		ED5372941DFC2CBE0066FF5A /* socketcomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = socketcomm.hpp; sourceTree = "<group>"; };
+		ED5372951DFC2CBE0066FF5A /* spi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spi.cpp; sourceTree = "<group>"; };
+		ED5372961DFC2CBE0066FF5A /* spi.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = spi.hpp; sourceTree = "<group>"; };
+		ED5372971DFC2CBE0066FF5A /* sqlite3persistence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sqlite3persistence.cpp; sourceTree = "<group>"; };
+		ED5372981DFC2CBE0066FF5A /* sqlite3persistence.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sqlite3persistence.hpp; sourceTree = "<group>"; };
+		ED5372991DFC2CBE0066FF5A /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		ED53729A1DFC2CBE0066FF5A /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
+		ED5372B61DFC9F650066FF5A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		ED5372B71DFC9F650066FF5A /* mongoose.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mongoose.c; sourceTree = "<group>"; };
+		ED5372B81DFC9F650066FF5A /* mongoose.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mongoose.h; sourceTree = "<group>"; };
+		ED5372C91DFC9F650066FF5A /* sqlite3pp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sqlite3pp.cpp; sourceTree = "<group>"; };
+		ED5372CA1DFC9F650066FF5A /* sqlite3pp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite3pp.h; sourceTree = "<group>"; };
+		ED5372CB1DFC9F650066FF5A /* sqlite3ppext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sqlite3ppext.cpp; sourceTree = "<group>"; };
+		ED5372CC1DFC9F650066FF5A /* sqlite3ppext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite3ppext.h; sourceTree = "<group>"; };
+		ED5372D91DFCA0CC0066FF5A /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		ED5372DB1DFCA1FF0066FF5A /* ledchaincomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ledchaincomm.cpp; sourceTree = "<group>"; };
+		ED5372DC1DFCA1FF0066FF5A /* ledchaincomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ledchaincomm.hpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		ED5372591DFC28D00066FF5A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED5372DA1DFCA0CC0066FF5A /* libsqlite3.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		ED5372531DFC28D00066FF5A = {
+			isa = PBXGroup;
+			children = (
+				ED53725E1DFC28D00066FF5A /* src */,
+				ED53725D1DFC28D00066FF5A /* Products */,
+				ED5372D81DFCA0CB0066FF5A /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		ED53725D1DFC28D00066FF5A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ED53725C1DFC28D00066FF5A /* pixelboardd */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		ED53725E1DFC28D00066FF5A /* src */ = {
+			isa = PBXGroup;
+			children = (
+				ED5372661DFC2C6D0066FF5A /* p44utils */,
+				ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		ED5372661DFC2C6D0066FF5A /* p44utils */ = {
+			isa = PBXGroup;
+			children = (
+				ED5372B41DFC9F650066FF5A /* thirdparty */,
+				ED5372671DFC2CBE0066FF5A /* application.cpp */,
+				ED5372681DFC2CBE0066FF5A /* application.hpp */,
+				ED5372691DFC2CBE0066FF5A /* colorutils.cpp */,
+				ED53726A1DFC2CBE0066FF5A /* colorutils.hpp */,
+				ED53726B1DFC2CBE0066FF5A /* consolekey.cpp */,
+				ED53726C1DFC2CBE0066FF5A /* consolekey.hpp */,
+				ED53726D1DFC2CBE0066FF5A /* digitalio.cpp */,
+				ED53726E1DFC2CBE0066FF5A /* digitalio.hpp */,
+				ED53726F1DFC2CBE0066FF5A /* error.cpp */,
+				ED5372701DFC2CBE0066FF5A /* error.hpp */,
+				ED5372711DFC2CBE0066FF5A /* fdcomm.cpp */,
+				ED5372721DFC2CBE0066FF5A /* fdcomm.hpp */,
+				ED5372731DFC2CBE0066FF5A /* gpio.cpp */,
+				ED5372741DFC2CBE0066FF5A /* gpio.h */,
+				ED5372751DFC2CBE0066FF5A /* gpio.hpp */,
+				ED5372761DFC2CBE0066FF5A /* httpcomm.cpp */,
+				ED5372771DFC2CBE0066FF5A /* httpcomm.hpp */,
+				ED5372781DFC2CBE0066FF5A /* i2c.cpp */,
+				ED5372791DFC2CBE0066FF5A /* i2c.hpp */,
+				ED53727A1DFC2CBE0066FF5A /* iopin.cpp */,
+				ED53727B1DFC2CBE0066FF5A /* iopin.hpp */,
+				ED5372DB1DFCA1FF0066FF5A /* ledchaincomm.cpp */,
+				ED5372DC1DFCA1FF0066FF5A /* ledchaincomm.hpp */,
+				ED53727C1DFC2CBE0066FF5A /* jsoncomm.cpp */,
+				ED53727D1DFC2CBE0066FF5A /* jsoncomm.hpp */,
+				ED53727E1DFC2CBE0066FF5A /* jsonobject.cpp */,
+				ED53727F1DFC2CBE0066FF5A /* jsonobject.hpp */,
+				ED5372801DFC2CBE0066FF5A /* jsonrpccomm.cpp */,
+				ED5372811DFC2CBE0066FF5A /* jsonrpccomm.hpp */,
+				ED5372821DFC2CBE0066FF5A /* jsonwebclient.cpp */,
+				ED5372831DFC2CBE0066FF5A /* jsonwebclient.hpp */,
+				ED5372841DFC2CBE0066FF5A /* logger.cpp */,
+				ED5372851DFC2CBE0066FF5A /* logger.hpp */,
+				ED5372861DFC2CBE0066FF5A /* mainloop.cpp */,
+				ED5372871DFC2CBE0066FF5A /* mainloop.hpp */,
+				ED5372881DFC2CBE0066FF5A /* operationqueue.cpp */,
+				ED5372891DFC2CBE0066FF5A /* operationqueue.hpp */,
+				ED53728A1DFC2CBE0066FF5A /* p44obj.cpp */,
+				ED53728B1DFC2CBE0066FF5A /* p44obj.hpp */,
+				ED53728C1DFC2CBE0066FF5A /* p44utils_common.hpp */,
+				ED53728D1DFC2CBE0066FF5A /* persistentparams.cpp */,
+				ED53728E1DFC2CBE0066FF5A /* persistentparams.hpp */,
+				ED53728F1DFC2CBE0066FF5A /* serialcomm.cpp */,
+				ED5372901DFC2CBE0066FF5A /* serialcomm.hpp */,
+				ED5372911DFC2CBE0066FF5A /* serialqueue.cpp */,
+				ED5372921DFC2CBE0066FF5A /* serialqueue.hpp */,
+				ED5372931DFC2CBE0066FF5A /* socketcomm.cpp */,
+				ED5372941DFC2CBE0066FF5A /* socketcomm.hpp */,
+				ED5372951DFC2CBE0066FF5A /* spi.cpp */,
+				ED5372961DFC2CBE0066FF5A /* spi.hpp */,
+				ED5372971DFC2CBE0066FF5A /* sqlite3persistence.cpp */,
+				ED5372981DFC2CBE0066FF5A /* sqlite3persistence.hpp */,
+				ED5372991DFC2CBE0066FF5A /* utils.cpp */,
+				ED53729A1DFC2CBE0066FF5A /* utils.hpp */,
+			);
+			path = p44utils;
+			sourceTree = "<group>";
+		};
+		ED5372B41DFC9F650066FF5A /* thirdparty */ = {
+			isa = PBXGroup;
+			children = (
+				ED5372B51DFC9F650066FF5A /* mongoose */,
+				ED5372C81DFC9F650066FF5A /* sqlite3pp */,
+			);
+			path = thirdparty;
+			sourceTree = "<group>";
+		};
+		ED5372B51DFC9F650066FF5A /* mongoose */ = {
+			isa = PBXGroup;
+			children = (
+				ED5372B61DFC9F650066FF5A /* LICENSE */,
+				ED5372B71DFC9F650066FF5A /* mongoose.c */,
+				ED5372B81DFC9F650066FF5A /* mongoose.h */,
+			);
+			path = mongoose;
+			sourceTree = "<group>";
+		};
+		ED5372C81DFC9F650066FF5A /* sqlite3pp */ = {
+			isa = PBXGroup;
+			children = (
+				ED5372C91DFC9F650066FF5A /* sqlite3pp.cpp */,
+				ED5372CA1DFC9F650066FF5A /* sqlite3pp.h */,
+				ED5372CB1DFC9F650066FF5A /* sqlite3ppext.cpp */,
+				ED5372CC1DFC9F650066FF5A /* sqlite3ppext.h */,
+			);
+			path = sqlite3pp;
+			sourceTree = "<group>";
+		};
+		ED5372D81DFCA0CB0066FF5A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ED5372D91DFCA0CC0066FF5A /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		ED53725B1DFC28D00066FF5A /* pixelboardd */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED5372631DFC28D00066FF5A /* Build configuration list for PBXNativeTarget "pixelboardd" */;
+			buildPhases = (
+				ED5372581DFC28D00066FF5A /* Sources */,
+				ED5372591DFC28D00066FF5A /* Frameworks */,
+				ED53725A1DFC28D00066FF5A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = pixelboardd;
+			productName = pixelboardd;
+			productReference = ED53725C1DFC28D00066FF5A /* pixelboardd */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ED5372541DFC28D00066FF5A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0810;
+				ORGANIZATIONNAME = plan44.ch;
+				TargetAttributes = {
+					ED53725B1DFC28D00066FF5A = {
+						CreatedOnToolsVersion = 8.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = ED5372571DFC28D00066FF5A /* Build configuration list for PBXProject "pixelboardd" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = ED5372531DFC28D00066FF5A;
+			productRefGroup = ED53725D1DFC28D00066FF5A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				ED53725B1DFC28D00066FF5A /* pixelboardd */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		ED5372581DFC28D00066FF5A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED5372A81DFC2CBE0066FF5A /* jsonwebclient.cpp in Sources */,
+				ED5372A11DFC2CBE0066FF5A /* gpio.cpp in Sources */,
+				ED5372AE1DFC2CBE0066FF5A /* serialcomm.cpp in Sources */,
+				ED53729B1DFC2CBE0066FF5A /* application.cpp in Sources */,
+				ED5372AC1DFC2CBE0066FF5A /* p44obj.cpp in Sources */,
+				ED5372B31DFC2CBE0066FF5A /* utils.cpp in Sources */,
+				ED5372AB1DFC2CBE0066FF5A /* operationqueue.cpp in Sources */,
+				ED53729C1DFC2CBE0066FF5A /* colorutils.cpp in Sources */,
+				ED53729F1DFC2CBE0066FF5A /* error.cpp in Sources */,
+				ED5372B21DFC2CBE0066FF5A /* sqlite3persistence.cpp in Sources */,
+				ED5372D51DFC9F720066FF5A /* mongoose.c in Sources */,
+				ED5372D61DFC9FC60066FF5A /* sqlite3ppext.cpp in Sources */,
+				ED5372A61DFC2CBE0066FF5A /* jsonobject.cpp in Sources */,
+				ED5372601DFC28D00066FF5A /* pixelboardd_main.cpp in Sources */,
+				ED5372B01DFC2CBE0066FF5A /* socketcomm.cpp in Sources */,
+				ED5372A41DFC2CBE0066FF5A /* iopin.cpp in Sources */,
+				ED5372B11DFC2CBE0066FF5A /* spi.cpp in Sources */,
+				ED5372AD1DFC2CBE0066FF5A /* persistentparams.cpp in Sources */,
+				ED5372A71DFC2CBE0066FF5A /* jsonrpccomm.cpp in Sources */,
+				ED5372A21DFC2CBE0066FF5A /* httpcomm.cpp in Sources */,
+				ED5372AA1DFC2CBE0066FF5A /* mainloop.cpp in Sources */,
+				ED5372A51DFC2CBE0066FF5A /* jsoncomm.cpp in Sources */,
+				ED5372D71DFC9FC90066FF5A /* sqlite3pp.cpp in Sources */,
+				ED5372A91DFC2CBE0066FF5A /* logger.cpp in Sources */,
+				ED5372AF1DFC2CBE0066FF5A /* serialqueue.cpp in Sources */,
+				ED5372DD1DFCA1FF0066FF5A /* ledchaincomm.cpp in Sources */,
+				ED5372A31DFC2CBE0066FF5A /* i2c.cpp in Sources */,
+				ED5372A01DFC2CBE0066FF5A /* fdcomm.cpp in Sources */,
+				ED53729D1DFC2CBE0066FF5A /* consolekey.cpp in Sources */,
+				ED53729E1DFC2CBE0066FF5A /* digitalio.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		ED5372611DFC28D00066FF5A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"/usr/local/include/json-c",
+					"$(PROJECT_DIR)/src",
+					"$(PROJECT_DIR)/src/p44utils",
+					"$(PROJECT_DIR)/src/p44utils/thirdparty",
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-ljson-c";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		ED5372621DFC28D00066FF5A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"/usr/local/include/json-c",
+					"$(PROJECT_DIR)/src",
+					"$(PROJECT_DIR)/src/p44utils",
+					"$(PROJECT_DIR)/src/p44utils/thirdparty",
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ljson-c";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		ED5372641DFC28D00066FF5A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		ED5372651DFC28D00066FF5A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		ED5372571DFC28D00066FF5A /* Build configuration list for PBXProject "pixelboardd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED5372611DFC28D00066FF5A /* Debug */,
+				ED5372621DFC28D00066FF5A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ED5372631DFC28D00066FF5A /* Build configuration list for PBXNativeTarget "pixelboardd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED5372641DFC28D00066FF5A /* Debug */,
+				ED5372651DFC28D00066FF5A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = ED5372541DFC28D00066FF5A /* Project object */;
+}
