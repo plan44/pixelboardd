@@ -1,0 +1,29 @@
+{
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "1C98728C56CE86B5262A5F2CCA5AA50CED8E2D1F" : 9223372036854775807,
+    "66AD18C62209A8C011BD8AB4EC00A0BA04EAE120" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "634652B5-C2C3-47DD-A573-F2DCFD055FE8",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "1C98728C56CE86B5262A5F2CCA5AA50CED8E2D1F" : "pixelboardd\/src\/p44utils\/",
+    "66AD18C62209A8C011BD8AB4EC00A0BA04EAE120" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "pixelboardd",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "pixelboardd.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/plan44.ch\/home\/plan44\/sharedgit\/p44utils.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "1C98728C56CE86B5262A5F2CCA5AA50CED8E2D1F"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/plan44.ch\/home\/plan44\/sharedgit\/pixelboard.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "66AD18C62209A8C011BD8AB4EC00A0BA04EAE120"
+    }
+  ]
+}
