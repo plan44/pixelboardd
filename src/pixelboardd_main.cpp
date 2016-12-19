@@ -29,6 +29,7 @@
 using namespace p44;
 
 #define MAINLOOP_CYCLE_TIME_uS 33333 // 33mS
+#define DEFAULT_LOGLEVEL LOG_NOTICE
 
 
 /// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
@@ -52,6 +53,9 @@ public:
       "Usage: %1$s [options]\n";
     const CmdLineOptionDescriptor options[] = {
       { 0  , "ledchain",      true,  "device;set device to send LED chain data to" },
+      { 'l', "loglevel",      true,  "level;set max level of log message detail to show on stdout" },
+      { 0  , "errlevel",      true,  "level;set max level for log messages to go to stderr as well" },
+      { 0  , "dontlogerrors", false, "don't duplicate error messages (see --errlevel) on stdout" },
       { 'h', "help",          false, "show this text" },
       { 0, NULL } // list terminator
     };
@@ -68,10 +72,17 @@ public:
 
     // build objects only if not terminated early
     if (!isTerminated()) {
+      int loglevel = DEFAULT_LOGLEVEL;
+      getIntOption("loglevel", loglevel);
+      SETLOGLEVEL(loglevel);
+      int errlevel = LOG_ERR; // testing by default only reports to stdout
+      getIntOption("errlevel", errlevel);
+      SETERRLEVEL(errlevel, !getOption("dontlogerrors"));
+
       // create the LED chain
       string leddev = "/tmp/ledchainsim";
       getStringOption("ledchain", leddev);
-      display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 10, false, true, true));
+      display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 20, false, true, true));
     } // if !terminated
     // app now ready to run (or cleanup when already terminated)
     return run();
@@ -83,21 +94,30 @@ public:
     display->begin();
     display->show();
     playfield = PlayFieldPtr(new PlayField);
-    playfield->launchRandomBlock(false, 0.6*Second);
+    playfield->launchRandomBlock(false, 1*Second);
+    refreshPlayfield();
     MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::idlehandler, this));
   }
+
+
+  void refreshPlayfield()
+  {
+    for (int x=0; x<10; x++) {
+      for (int y=0; y<20; y++) {
+        int cc = playfield->colorAt(x, y);
+        display->setColorXY(x, y, cc & 0x01 ? 0xFF : 0, cc & 0x02 ? 0xFF : 0, cc & 0x04 ? 0xFF : 0);
+      }
+    }
+    display->show();
+  }
+
+
 
   bool idlehandler()
   {
     if (playfield->step()) {
-      for (int x=0; x<10; x++) {
-        for (int y=0; y<20; y++) {
-          int cc = playfield->colorAt(x, y);
-          display->setColorXY(x, y, cc & 0x01 ? 0xFF : 0, cc & 0x02 ? 0xFF : 0, cc & 0x04 ? 0xFF : 0);
-        }
-      }
+      refreshPlayfield();
     }
-    display->show();
     return true;
   }
   

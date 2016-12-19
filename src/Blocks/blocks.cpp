@@ -72,7 +72,7 @@ Block::Block(PlayField &aPlayField, BlockType aBlockType, ColorCode aColorCode) 
 bool Block::getPixel(int aPixelIndex, int &aDx, int &aDy)
 {
   BlockDef *bd = &blockDefs[blockType];
-  if (aPixelIndex<0 || aPixelIndex>bd->numPixels) return false;
+  if (aPixelIndex<0 || aPixelIndex>=bd->numPixels) return false;
   aDx = bd->pixelOffsets[aPixelIndex].dx;
   aDy = bd->pixelOffsets[aPixelIndex].dy;
   return true;
@@ -150,7 +150,7 @@ bool Block::position(int aX, int aY, int aOrientation, bool aOpenAtBottom)
   remove();
   // check that new position is free
   while (getPositionedPixel(idx, aX, aY, aOrientation, px, py)) {
-    if (!playField.isWithin(px, py, true, aOpenAtBottom) || playField.colorAt(x, y)!=0) {
+    if (!playField.isWithin(px, py, true, aOpenAtBottom) || playField.colorAt(px, py)!=0) {
       // collision or not within field
       if (wasShown) {
         // show again at previous position
