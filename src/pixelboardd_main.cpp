@@ -28,7 +28,7 @@
 
 using namespace p44;
 
-#define MAINLOOP_CYCLE_TIME_uS 33333 // 33mS
+#define MAINLOOP_CYCLE_TIME_uS 10000 // 10mS
 #define DEFAULT_LOGLEVEL LOG_NOTICE
 
 
@@ -40,6 +40,12 @@ class PixelBoardD : public CmdLineApp
   LEDChainCommPtr display;
 
   PlayFieldPtr playfield;
+
+  ButtonInputPtr lower_left;
+  ButtonInputPtr lower_right;
+  ButtonInputPtr lower_turn;
+  ButtonInputPtr lower_drop;
+
 
 public:
 
@@ -83,6 +89,18 @@ public:
       string leddev = "/tmp/ledchainsim";
       getStringOption("ledchain", leddev);
       display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 20, false, true, true));
+
+      // create the controls
+      lower_left = ButtonInputPtr(new ButtonInput("simpin.left:j"));
+      lower_left->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, 1, 0, false), false); // left
+      lower_right = ButtonInputPtr(new ButtonInput("simpin.right:l"));
+      lower_right->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, -1, 0, false), false); // right
+      lower_turn = ButtonInputPtr(new ButtonInput("simpin.turn:k"));
+      lower_turn->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, 0, 1, false), false); // turn
+      lower_drop = ButtonInputPtr(new ButtonInput("simpin.drop:m"));
+      lower_drop->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, 0, 0, true), false); // drop
+
+
     } // if !terminated
     // app now ready to run (or cleanup when already terminated)
     return run();
@@ -94,9 +112,9 @@ public:
     display->begin();
     display->show();
     playfield = PlayFieldPtr(new PlayField);
-    playfield->launchRandomBlock(false, 1*Second);
+    playfield->launchRandomBlock(false);
     refreshPlayfield();
-    MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::idlehandler, this));
+    MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
   }
 
 
@@ -113,14 +131,25 @@ public:
 
 
 
-  bool idlehandler()
+  bool step()
   {
     if (playfield->step()) {
       refreshPlayfield();
     }
     return true;
   }
-  
+
+
+  void controlHandler(bool aLower, int aMovement, int aRotation, bool aDrop)
+  {
+    if (aMovement!=0 || aRotation!=0) {
+      playfield->moveBlock(aMovement, aRotation, aLower);
+    }
+    if (aDrop) {
+      playfield->dropBlock(aLower);
+    }
+    step();
+  }
   
 
 

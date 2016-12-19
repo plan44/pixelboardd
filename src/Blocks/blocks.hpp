@@ -137,7 +137,14 @@ namespace p44 {
 
     BlockRunner activeBlocks[2]; ///< the max 2 active blocks (top and bottom)
 
+    bool dirty;
+
   public :
+
+    MLMicroSeconds stepInterval;
+    MLMicroSeconds dropStepInterval;
+    MLMicroSeconds rowKillDelay;
+
 
     PlayField();
 
@@ -166,17 +173,25 @@ namespace p44 {
     /// @param aOrientation initial orientation
     /// @param aBottom if set, launch a block from bottom up
     /// @param aStepInterval how fast the block should move
-    void launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom, MLMicroSeconds aStepInterval);
+    void launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom);
 
     /// launch new random block
-    void launchRandomBlock(bool aBottom, MLMicroSeconds aStepInterval);
+    void launchRandomBlock(bool aBottom);
 
     /// calculate changes on the playfield, return true if any
     /// @return true if anything has changed (so display refresh is needed)
     bool step();
 
     /// move block
-    bool moveBlock(int aDx, int aRot, bool aLower);
+    void moveBlock(int aDx, int aRot, bool aLower);
+
+    /// change speed of block
+    void dropBlock(bool aLower);
+
+  private:
+
+    void removeRow(int aY, bool aBlockFromBottom);
+    void checkRows(bool aBlockFromBottom);
 
 
   };

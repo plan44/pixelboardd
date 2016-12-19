@@ -185,7 +185,11 @@ bool Block::move(int aDx, int aDy, int aRot, bool aOpenAtBottom)
 // MARK: ===== PlayField
 
 
-PlayField::PlayField()
+PlayField::PlayField() :
+  dirty(false),
+  stepInterval(0.7*Second),
+  dropStepInterval(0.05*Second),
+  rowKillDelay(0.05*Second)
 {
   clear();
 }
@@ -222,7 +226,7 @@ void PlayField::setColorAt(ColorCode aColorCode, int aX, int aY)
 }
 
 
-void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom, MLMicroSeconds aStepInterval)
+void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom)
 {
   BlockRunner *b = &activeBlocks[aBottom ? 1 : 0];
   // remove block if any is already running
@@ -230,7 +234,7 @@ void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation,
   // create new block
   b->block = BlockPtr(new Block(*this, aBlockType));
   b->movingUp = aBottom;
-  b->stepInterval = aStepInterval;
+  b->stepInterval = stepInterval;
   // position it
   int minx,maxx,miny,maxy;
   b->block->getExtents(aBottom ? (aOrientation+2) % 4 : aOrientation, minx, maxx, miny, maxy);
@@ -250,47 +254,109 @@ void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation,
 }
 
 
+
+void PlayField::launchRandomBlock(bool aBottom)
+{
+  BlockType bt = (BlockType)(rand() % numBlockTypes);
+  //  int col = rand() % PLAYFIELD_NUMCOLS;
+  int col = 5; // always the same
+  launchBlock(bt, col, 0, aBottom);
+}
+
+
+
+void PlayField::removeRow(int aY, bool aBlockFromBottom)
+{
+  // unshow running blocks
+  for (int i=0; i<2; i++) {
+    BlockRunner *b = &activeBlocks[i];
+    if (b->block) b->block->remove();
+  }
+  // move towards falling direction of block that has caused the row to fill
+  int dir = aBlockFromBottom ? -1 : 1;
+  for (int y=aY; (aBlockFromBottom ? y>=0 : y<PLAYFIELD_NUMROWS); y += dir) {
+    for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
+      setColorAt(colorAt(x, y+dir), x, y);
+    }
+  }
+  // re-show running blocks
+  for (int i=0; i<2; i++) {
+    BlockRunner *b = &activeBlocks[i];
+    if (b->block) b->block->show();
+  }
+  // ccontinue checking
+  MainLoop::currentMainLoop().executeOnce(boost::bind(&PlayField::checkRows, this, aBlockFromBottom), rowKillDelay);
+  dirty = true;
+}
+
+
+void PlayField::checkRows(bool aBlockFromBottom)
+{
+  for (int y=0; y<PLAYFIELD_NUMROWS; y++) {
+    // check each row
+    bool hasGap = false;
+    for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
+      if (colorAt(x, y)==0) {
+        hasGap = true;
+        break;
+      }
+    }
+    if (!hasGap) {
+      // full row found
+      for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
+        // light up
+        setColorAt(7, x, y);
+      }
+      dirty = true;
+      MainLoop::currentMainLoop().executeOnce(boost::bind(&PlayField::removeRow, this, y, aBlockFromBottom), rowKillDelay);
+    }
+  }
+}
+
+
+
 bool PlayField::step()
 {
-  bool changed = false;
+  dirty = false;
   MLMicroSeconds now = MainLoop::now();
   for (int i=0; i<2; i++) {
     BlockRunner *b = &activeBlocks[i];
     if (b->block) {
       if (now>=b->lastStep+b->stepInterval) {
         if (b->block->move(0, b->movingUp ? 1 : -1, 0, b->movingUp)) {
-          changed = true;
+          b->lastStep = now;
+          dirty = true;
         }
         else {
-          // could not move, means that we've collided with bounds or existing pixels
-          // TODO: check full rows and have them go away
+          // could not move, means that we've collided with floor or existing pixels
+          checkRows(b->movingUp);
           // remove block (but pixels will remain)
           b->block = NULL;
           // start new one
-          launchRandomBlock(b->movingUp, b->stepInterval);
+          launchRandomBlock(b->movingUp);
         }
       }
     }
   }
-  return changed;
+  return dirty;
 }
 
 
-bool PlayField::moveBlock(int aDx, int aRot, bool aLower)
+void PlayField::moveBlock(int aDx, int aRot, bool aLower)
 {
   BlockRunner *b = &activeBlocks[aLower ? 1 : 0];
   if (b->block) {
-    return b->block->move(aDx, 0, aRot, aLower);
+    if (b->block->move(aDx, 0, aRot, aLower))
+      dirty = true;
   }
-  return false;
 }
 
 
-void PlayField::launchRandomBlock(bool aBottom, MLMicroSeconds aStepInterval)
+void PlayField::dropBlock(bool aLower)
 {
-  BlockType bt = (BlockType)(rand() % numBlockTypes);
-  int col = rand() % PLAYFIELD_NUMCOLS;
-  launchBlock(bt, col, 0, aBottom, aStepInterval);
+  BlockRunner *b = &activeBlocks[aLower ? 1 : 0];
+  if (b->block) {
+    b->stepInterval = dropStepInterval;
+  }
 }
-
 
