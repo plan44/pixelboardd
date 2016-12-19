@@ -50,8 +50,12 @@ pixelboardd_SOURCES = \
   src/p44utils/gpio.cpp \
   src/p44utils/gpio.h \
   src/p44utils/gpio.hpp \
+  src/p44utils/httpcomm.cpp\
+  src/p44utils/httpcomm.hpp\
   src/p44utils/i2c.cpp \
   src/p44utils/i2c.hpp \
+  src/p44utils/igmp.cpp \
+  src/p44utils/igmp.hpp \
   src/p44utils/iopin.cpp \
   src/p44utils/iopin.hpp \
   src/p44utils/jsoncomm.cpp \
