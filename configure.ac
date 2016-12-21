@@ -22,6 +22,24 @@ esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
 
+P44_BUILD_OW="no"
+AC_ARG_ENABLE([p44buildow],
+    [AC_HELP_STRING([--enable-p44buildow],
+                    [plan44 build for OpenWRT (default: no)]) ],
+    [
+        if test "x$enableval" = "xno"; then
+            P44_BUILD_OW="no"
+        elif test "x$enableval" = "xyes"; then
+            P44_BUILD_OW="yes"
+        fi
+    ]
+)
+if (test "x$P44_BUILD_OW" = "xyes"); then
+    AC_DEFINE([P44_BUILD_OW], [1], [plan44 OpenWRT build])
+fi
+AM_CONDITIONAL([P44_BUILD_OW], [test "x$P44_BUILD_OW" = "xyes"])
+
+
 AC_CHECK_LIB(m, atan2, [], [AC_MSG_ERROR([Could not find math lib (m)])])
 AC_CHECK_LIB(rt, clock_gettime, [], [AC_MSG_ERROR([Could not find rt lib for clock_gettime])])
 AC_CHECK_LIB(dl, dlopen, [], [AC_MSG_ERROR([Could not find libdl])])

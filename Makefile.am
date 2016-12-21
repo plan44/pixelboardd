@@ -11,6 +11,14 @@ else
 pixelboardd_DEBUG =
 endif
 
+if P44_BUILD_OW
+pixelboardd_PLATFORM = -D P44_BUILD_OW=1
+else
+pixelboardd_PLATFORM =
+endif
+
+
+
 pixelboardd_LDADD = $(JSONC_LIBS) $(PTHREAD_LIBS) $(SQLITE3_LIBS)
 
 
@@ -26,6 +34,7 @@ pixelboardd_CXXFLAGS = \
   ${JSONC_CFLAGS} \
   ${PTHREAD_CFLAGS} \
   ${SQLITE3_LIBS} \
+  ${pixelboardd_PLATFORM} \
   ${pixelboardd_DEBUG}
 
 pixelboardd_SOURCES = \
