@@ -40,7 +40,7 @@ typedef struct {
 } BlockDef;
 
 
-static BlockDef blockDefs[numBlockTypes] = {
+static const BlockDef blockDefs[numBlockTypes] = {
   { 1, 4, { {-2,0},{-1,0},{0,0},{1,0} }}, // line
   { 2, 4, { {0,0},{1,0},{1,1},{0,1} }}, // square
   { 3, 4, { {0,-1},{1,-1},{0,0},{0,1} }}, // L
@@ -71,7 +71,7 @@ Block::Block(PlayField &aPlayField, BlockType aBlockType, ColorCode aColorCode) 
 
 bool Block::getPixel(int aPixelIndex, int &aDx, int &aDy)
 {
-  BlockDef *bd = &blockDefs[blockType];
+  const BlockDef *bd = &blockDefs[blockType];
   if (aPixelIndex<0 || aPixelIndex>=bd->numPixels) return false;
   aDx = bd->pixelOffsets[aPixelIndex].dx;
   aDy = bd->pixelOffsets[aPixelIndex].dy;
@@ -139,6 +139,19 @@ void Block::show()
     }
   }
 }
+
+
+void Block::dim()
+{
+  int px,py;
+  int idx=0;
+  shown = true;
+  while (getPositionedPixel(idx, x, y, orientation, px, py)) {
+    playField.setColorAt(colorCode | 0x10, px, py);
+    idx++;
+  }
+}
+
 
 
 bool Block::position(int aX, int aY, int aOrientation, bool aOpenAtBottom)
@@ -232,7 +245,7 @@ void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation,
   // remove block if any is already running
   if (b->block) b->block->remove();
   // create new block
-  b->block = BlockPtr(new Block(*this, aBlockType));
+  b->block = BlockPtr(new Block(*this, aBlockType, (aBottom ? 8 : 0)+blockDefs[aBlockType].color));
   b->movingUp = aBottom;
   b->stepInterval = stepInterval;
   // position it
@@ -305,10 +318,11 @@ void PlayField::checkRows(bool aBlockFromBottom)
       // full row found
       for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
         // light up
-        setColorAt(7, x, y);
+        setColorAt(32, x, y); // row flash
       }
       dirty = true;
       MainLoop::currentMainLoop().executeOnce(boost::bind(&PlayField::removeRow, this, y, aBlockFromBottom), rowKillDelay);
+      break;
     }
   }
 }
@@ -329,6 +343,8 @@ bool PlayField::step()
         }
         else {
           // could not move, means that we've collided with floor or existing pixels
+          dirty = true;
+          b->block->dim();
           checkRows(b->movingUp);
           // remove block (but pixels will remain)
           b->block = NULL;

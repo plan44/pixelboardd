@@ -67,11 +67,19 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--notouch"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--consolekeys"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--ledchain /tmp/ledchainsim"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-l 7"
+            argument = "-l 6"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

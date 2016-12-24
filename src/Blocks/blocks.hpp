@@ -76,6 +76,9 @@ namespace p44 {
     /// show on playfield
     void show();
 
+    /// switch colors to dimmed palette
+    void dim();
+
     /// move block
     bool move(int aDx, int aDy, int aRot, bool aOpenAtBottom);
 
@@ -172,11 +175,13 @@ namespace p44 {
     /// @param aColumn the column where to launch (will be adjusted left or right in case block extends playfield)
     /// @param aOrientation initial orientation
     /// @param aBottom if set, launch a block from bottom up
-    /// @param aStepInterval how fast the block should move
     void launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom);
 
     /// launch new random block
     void launchRandomBlock(bool aBottom);
+
+    /// return if anything changed on the playfield since last call
+    bool isDirty() { return dirty; }
 
     /// calculate changes on the playfield, return true if any
     /// @return true if anything has changed (so display refresh is needed)
