@@ -28,6 +28,7 @@
 
 
 #include "blocks.hpp"
+#include "display.hpp"
 
 using namespace p44;
 
@@ -106,10 +107,16 @@ class PixelBoardD : public CmdLineApp
   // API Server
   SocketCommPtr apiServer;
 
+  // Q&D
+  DisplayPtr dsp;
+  int mode; // 0=display, 1=blocks
+  MLMicroSeconds starttime;
 
 public:
 
-  PixelBoardD()
+  PixelBoardD() :
+    mode(0),
+    starttime(MainLoop::now())
   {
   }
 
@@ -124,6 +131,7 @@ public:
       { 0  , "jsonapiport",    true,  "port;server port number for JSON API (default=none)" },
       { 0  , "jsonapinonlocal",false, "allow JSON API from non-local clients" },
       { 0  , "two",            false, "cooperative two-player game" },
+      { 0  , "display",        true,  "filename;show image" },
       { 'l', "loglevel",       true,  "level;set max level of log message detail to show on stdout" },
       { 0  , "errlevel",       true,  "level;set max level for log messages to go to stderr as well" },
       { 0  , "dontlogerrors",  false, "don't duplicate error messages (see --errlevel) on stdout" },
@@ -164,6 +172,14 @@ public:
         apiServer->startServer(boost::bind(&PixelBoardD::apiConnectionHandler, this, _1), 3);
       }
 
+      string bgimage;
+      if (getStringOption("display", bgimage)) {
+        dsp = DisplayPtr(new Display());
+        dsp->loadPNGBackground(bgimage);
+      }
+
+      playfield = PlayFieldPtr(new PlayField);
+
       if (getOption("consolekeys")) {
         // create the console keys
         lower_left = ButtonInputPtr(new ButtonInput("simpin.left:j"));
@@ -200,7 +216,14 @@ public:
     srand((unsigned)MainLoop::currentMainLoop().now()*4223);
     display->begin();
     display->show();
-    playfield = PlayFieldPtr(new PlayField);
+    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::refreshDsp, this), 2*Second);
+  }
+
+
+
+
+  void play()
+  {
     playfield->launchRandomBlock(false);
     if (getOption("two")) {
       playfield->launchRandomBlock(true);
@@ -208,6 +231,7 @@ public:
     refreshPlayfield();
     MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
   }
+
 
 
   SocketCommPtr apiConnectionHandler(SocketCommPtr aServerSocketComm)
@@ -336,6 +360,18 @@ public:
   }
 
 
+  void refreshDsp()
+  {
+    for (int x=0; x<10; x++) {
+      for (int y=0; y<20; y++) {
+        RGBWebColor p = dsp->colorAt(x, y);
+        display->setColorXY(x, y, p.r, p.g, p.b);
+      }
+    }
+    display->show();
+  }
+
+
 
   bool step()
   {
@@ -349,16 +385,22 @@ public:
 
   void controlHandler(bool aLower, int aMovement, int aRotation, bool aDrop)
   {
-    // left/right is always seen from bottom end, so needs to be swapped if aLower
-    if (aLower) aMovement = -aMovement;
-    if (aMovement!=0 || aRotation!=0) {
-      playfield->moveBlock(aMovement, aRotation, aLower);
+    if (mode==0 && starttime+15*Second<=MainLoop::now()) {
+      mode=1;
+      play();
     }
-    if (aDrop) {
-      playfield->dropBlock(aLower);
-    }
-    if (playfield->isDirty()) {
-      refreshPlayfield();
+    else {
+      // left/right is always seen from bottom end, so needs to be swapped if aLower
+      if (aLower) aMovement = -aMovement;
+      if (aMovement!=0 || aRotation!=0) {
+        playfield->moveBlock(aMovement, aRotation, aLower);
+      }
+      if (aDrop) {
+        playfield->dropBlock(aLower);
+      }
+      if (playfield->isDirty()) {
+        refreshPlayfield();
+      }
     }
   }
   

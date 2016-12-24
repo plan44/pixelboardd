@@ -19,7 +19,7 @@ endif
 
 
 
-pixelboardd_LDADD = $(JSONC_LIBS) $(PTHREAD_LIBS) $(SQLITE3_LIBS)
+pixelboardd_LDADD = $(JSONC_LIBS) $(PTHREAD_LIBS) $(SQLITE3_LIBS) $(PNG_LIBS)
 
 
 pixelboardd_CXXFLAGS = \
@@ -28,12 +28,14 @@ pixelboardd_CXXFLAGS = \
   -I ${srcdir}/src/p44utils/thirdparty \
   -I ${srcdir}/src \
   -I ${srcdir}/src/Blocks \
+  -I ${srcdir}/src/Display \
   -D DISABLE_I2C=0 \
   -D DISABLE_SPI=0 \
   ${BOOST_CPPFLAGS} \
   ${JSONC_CFLAGS} \
   ${PTHREAD_CFLAGS} \
-  ${SQLITE3_LIBS} \
+  ${SQLITE3_CFLAGS} \
+  ${PNG_CFLAGS} \
   ${pixelboardd_PLATFORM} \
   ${pixelboardd_DEBUG}
 
@@ -112,4 +114,6 @@ pixelboardd_SOURCES = \
   src/p44utils/p44utils_common.hpp \
   src/Blocks/blocks.cpp \
   src/Blocks/blocks.hpp \
+  src/Display/display.cpp \
+  src/Display/display.hpp \
   src/pixelboardd_main.cpp
