@@ -216,6 +216,7 @@ public:
     srand((unsigned)MainLoop::currentMainLoop().now()*4223);
     display->begin();
     display->show();
+    MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
     MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::refreshDsp, this), 2*Second);
   }
 
@@ -229,7 +230,6 @@ public:
       playfield->launchRandomBlock(true);
     }
     refreshPlayfield();
-    MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
   }
 
 
@@ -285,8 +285,8 @@ public:
   {
     ErrorPtr err;
     JsonObjectPtr o;
-    if (aUri=="/player1" || aUri=="/player2") {
-      bool lower = aUri=="/player2";
+    if (aUri=="player1" || aUri=="player2") {
+      bool lower = aUri=="player2";
       if (aIsAction) {
         if (aData->get("key", o)) {
           string key = o->stringValue();
@@ -297,12 +297,12 @@ public:
           else if (key=="turn")
             controlHandler(lower, 0, 1, false); // turn
           else if (key=="drop")
-            controlHandler(lower, 0, 1, false); // turn
+            controlHandler(lower, 0, 0, true); // drop
         }
       }
     }
     else {
-      err = WebError::webErr(500, "Unknown URI");
+      err = WebError::webErr(500, "Unknown URI '%s'", aUri.c_str());
     }
     // return error or ok
     if (Error::isOK(err))
@@ -375,8 +375,10 @@ public:
 
   bool step()
   {
-    if (playfield->step()) {
-      refreshPlayfield();
+    if (mode!=0) {
+      if (playfield->step()) {
+        refreshPlayfield();
+      }
     }
     checkInputs();
     return true; // completed for this cycle (10mS)

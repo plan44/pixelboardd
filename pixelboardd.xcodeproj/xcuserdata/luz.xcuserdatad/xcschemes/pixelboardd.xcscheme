@@ -67,6 +67,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--jsonapiport 8090"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--display /Users/luz/Desktop/xmas.png"
             isEnabled = "YES">
          </CommandLineArgument>
