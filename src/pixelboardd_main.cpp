@@ -241,8 +241,6 @@ public:
 
   void apiRequestHandler(JsonCommPtr aConnection, ErrorPtr aError, JsonObjectPtr aRequest)
   {
-    ErrorPtr err;
-    JsonObjectPtr answer = JsonObject::newObj();
     // Decode mg44-style request (HTTP wrapped in JSON)
     if (Error::isOK(aError)) {
       LOG(LOG_INFO,"API request: %s", aRequest->c_strValue());
@@ -271,32 +269,45 @@ public:
           // URI params is the JSON to process
           data = aRequest->get("uri_params");
           if (data) action = true; // GET, but with query_params: treat like PUT/POST with data
-        }
-        // request elements now: uri and data
-        JsonObjectPtr r;
-        if (upload) {
-          ErrorPtr e = processUpload(uri, data, uploadedfile);
-          if (!Error::isOK(e)) {
-            answer->add("Error", JsonObject::newString(e->description()));
+          if (upload) {
+            // move that into the request
+            data->add("uploadedfile", JsonObject::newString(uploadedfile));
           }
         }
-        else {
-          r = processRequest(uri, data, action);
+        // request elements now: uri and data
+        if (processRequest(uri, data, action, boost::bind(&PixelBoardD::requestHandled, this, aConnection, _1, _2))) {
+          // done, callback will send response and close connection
+          return;
         }
-        if (r) answer->add("result", r);
+        // request cannot be processed, return error
+        LOG(LOG_ERR,"Invalid JSON request");
+        aError = WebError::webErr(404, "No handler found for request to %s", uri.c_str());
+      }
+      else {
+        LOG(LOG_ERR,"Invalid JSON request");
+        aError = WebError::webErr(415, "Invalid JSON request format");
       }
     }
-    else {
-      LOG(LOG_ERR,"Invalid JSON request");
-      answer->add("Error", JsonObject::newString(aError->description()));
+    // return error
+    requestHandled(aConnection, JsonObjectPtr(), aError);
+  }
+
+
+  void requestHandled(JsonCommPtr aConnection, JsonObjectPtr aResponse, ErrorPtr aError)
+  {
+    if (!aResponse) {
+      aResponse = JsonObject::newObj(); // empty response
     }
-    LOG(LOG_INFO,"API answer: %s", answer->c_strValue());
-    err = aConnection->sendMessage(answer);
+    if (!Error::isOK(aError)) {
+      aResponse->add("Error", JsonObject::newString(aError->description()));
+    }
+    LOG(LOG_INFO,"API answer: %s", aResponse->c_strValue());
+    aConnection->sendMessage(aResponse);
     aConnection->closeAfterSend();
   }
 
 
-  JsonObjectPtr processRequest(string aUri, JsonObjectPtr aData, bool aIsAction)
+  bool processRequest(string aUri, JsonObjectPtr aData, bool aIsAction, RequestDoneCB aRequestDoneCB)
   {
     ErrorPtr err;
     JsonObjectPtr o;
@@ -315,6 +326,8 @@ public:
             keyHandler(side, 2); // drop
         }
       }
+      aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
+      return true;
     }
     else if (aUri=="board") {
       if (aIsAction) {
@@ -326,18 +339,34 @@ public:
           gotoPage(page, twoSided);
         }
       }
+      aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
+      return true;
     }
-    else {
-      err = WebError::webErr(500, "Unknown URI '%s'", aUri.c_str());
+    else if (aUri=="page") {
+      // ask each page
+      for (PagesMap::iterator pos = pages.begin(); pos!=pages.end(); ++pos) {
+        if (pos->second->handleRequest(aData, aRequestDoneCB)) {
+          // request will be handled by this page, done for now
+          return true;
+        }
+      }
     }
-    // return error or ok
-    if (Error::isOK(err))
-      return JsonObjectPtr(); // ok
-    else {
-      JsonObjectPtr errorJson = JsonObject::newObj();
-      errorJson->add("error", JsonObject::newString(err->description()));
-      return errorJson;
+    else if (aUri=="/") {
+      string uploadedfile;
+      string cmd;
+      if (aData->get("uploadedfile", o))
+        uploadedfile = o->stringValue();
+      if (aData->get("cmd", o))
+        cmd = o->stringValue();
+      if (cmd=="imageupload" && displayPage) {
+        ErrorPtr err = displayPage->loadPNGBackground(uploadedfile);
+        gotoPage("display", false);
+        updateDisplay();
+        aRequestDoneCB(JsonObjectPtr(), err);
+        return true;
+      }
     }
+    return false;
   }
 
 
