@@ -255,16 +255,35 @@ public:
         o = aRequest->get("uri");
         if (o) uri = o->stringValue();
         JsonObjectPtr data;
+        bool upload = false;
         bool action = (method!="GET");
+        // check for uploads
+        string uploadedfile;
+        if (aRequest->get("uploadedfile", o)) {
+          uploadedfile = o->stringValue();
+          upload = true;
+          action = false; // other params are in the URI, not the POSTed upload
+        }
         if (action) {
+          // JSON data is in the request
           data = aRequest->get("data");
         }
         else {
+          // URI params is the JSON to process
           data = aRequest->get("uri_params");
           if (data) action = true; // GET, but with query_params: treat like PUT/POST with data
         }
         // request elements now: uri and data
-        JsonObjectPtr r = processRequest(uri, data, action);
+        JsonObjectPtr r;
+        if (upload) {
+          ErrorPtr e = processUpload(uri, data, uploadedfile);
+          if (!Error::isOK(e)) {
+            answer->add("Error", JsonObject::newString(e->description()));
+          }
+        }
+        else {
+          r = processRequest(uri, data, action);
+        }
         if (r) answer->add("result", r);
       }
     }
@@ -323,12 +342,35 @@ public:
   }
 
 
+  ErrorPtr processUpload(string aUri, JsonObjectPtr aData, const string aUploadedFile)
+  {
+    ErrorPtr err;
+
+    string cmd;
+    JsonObjectPtr o;
+    if (aData->get("cmd", o)) {
+      cmd = o->stringValue();
+      if (cmd=="imageupload") {
+        dsp->loadPNGBackground(aUploadedFile);
+        refreshDsp();
+      }
+      else {
+        err = WebError::webErr(500, "Unknown upload cmd '%s'", cmd.c_str());
+      }
+    }
+    return err;
+  }
+
+
   void showPage(const string page, bool aTwoSided)
   {
     // FIXME: Q&D now
     if (page=="blocks") {
       mode=1;
       play(aTwoSided);
+    }
+    else if (page=="display") {
+      mode=0;
     }
   }
 
