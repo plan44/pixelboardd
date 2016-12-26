@@ -71,7 +71,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--display /Users/luz/Desktop/xmas.png"
+            argument = "--display /Volumes/OpenWRT/openwrt/feeds/plan44/pixelboard-config/files/www/images/xmas.png"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

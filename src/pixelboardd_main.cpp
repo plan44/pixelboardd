@@ -223,12 +223,9 @@ public:
 
 
 
-  void play()
+  void play(bool aTwoPlayer)
   {
-    playfield->launchRandomBlock(false);
-    if (getOption("two")) {
-      playfield->launchRandomBlock(true);
-    }
+    playfield->restart(aTwoPlayer);
     refreshPlayfield();
   }
 
@@ -301,6 +298,17 @@ public:
         }
       }
     }
+    else if (aUri=="board") {
+      if (aIsAction) {
+        bool twoSided = false;
+        if (aData->get("twosided", o))
+          twoSided = o->boolValue();
+        if (aData->get("page", o)) {
+          string page = o->stringValue();
+          showPage(page, twoSided);
+        }
+      }
+    }
     else {
       err = WebError::webErr(500, "Unknown URI '%s'", aUri.c_str());
     }
@@ -311,6 +319,16 @@ public:
       JsonObjectPtr errorJson = JsonObject::newObj();
       errorJson->add("error", JsonObject::newString(err->description()));
       return errorJson;
+    }
+  }
+
+
+  void showPage(const string page, bool aTwoSided)
+  {
+    // FIXME: Q&D now
+    if (page=="blocks") {
+      mode=1;
+      play(aTwoSided);
     }
   }
 
@@ -389,7 +407,7 @@ public:
   {
     if (mode==0 && starttime+15*Second<=MainLoop::now()) {
       mode=1;
-      play();
+      play(getOption("two"));
     }
     else {
       // left/right is always seen from bottom end, so needs to be swapped if aLower

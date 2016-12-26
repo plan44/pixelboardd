@@ -213,6 +213,22 @@ void PlayField::clear(ColorCode aFillColor)
   for (int i=0; i<PLAYFIELD_NUMPIXELS; ++i) {
     colorCodes[i] = aFillColor;
   }
+  // remove block if any is already running
+  for (int bi=0; bi<2; bi++) {
+    BlockRunner *b = &activeBlocks[bi];
+    if (b->block) b->block->remove();
+    b->block = NULL;
+  }
+}
+
+
+void PlayField::restart(bool aTwoPlayer)
+{
+  clear();
+  launchRandomBlock(false);
+  if (aTwoPlayer) {
+    launchRandomBlock(true);
+  }
 }
 
 
@@ -239,7 +255,7 @@ void PlayField::setColorAt(ColorCode aColorCode, int aX, int aY)
 }
 
 
-void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom)
+bool PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom)
 {
   BlockRunner *b = &activeBlocks[aBottom ? 1 : 0];
   // remove block if any is already running
@@ -262,18 +278,25 @@ void PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation,
   else {
     row = -maxy;
   }
-  b->block->position(aColumn, row, aOrientation, aBottom);
-  b->lastStep = MainLoop::now();
+  if (!b->block->position(aColumn, row, aOrientation, aBottom)) {
+    // cannot launch a block any more
+    b->block = NULL;
+    return false;
+  }
+  else {
+    b->lastStep = MainLoop::now();
+    return true;
+  }
 }
 
 
 
-void PlayField::launchRandomBlock(bool aBottom)
+bool PlayField::launchRandomBlock(bool aBottom)
 {
   BlockType bt = (BlockType)(rand() % numBlockTypes);
   //  int col = rand() % PLAYFIELD_NUMCOLS;
   int col = 5; // always the same
-  launchBlock(bt, col, 0, aBottom);
+  return launchBlock(bt, col, 0, aBottom);
 }
 
 
@@ -349,7 +372,9 @@ bool PlayField::step()
           // remove block (but pixels will remain)
           b->block = NULL;
           // start new one
-          launchRandomBlock(b->movingUp);
+          if (!launchRandomBlock(b->movingUp)) {
+            // TODO: Game over for this player
+          }
         }
       }
     }

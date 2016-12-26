@@ -154,6 +154,10 @@ namespace p44 {
     /// clear entire field
     void clear(ColorCode aFillColor = 0);
 
+    /// restart
+    /// @param aTwoPlayer if set, pieces fall from both sides
+    void restart(bool aTwoPlayer);
+
     /// get color at X,Y
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
@@ -175,10 +179,10 @@ namespace p44 {
     /// @param aColumn the column where to launch (will be adjusted left or right in case block extends playfield)
     /// @param aOrientation initial orientation
     /// @param aBottom if set, launch a block from bottom up
-    void launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom);
+    bool launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom);
 
     /// launch new random block
-    void launchRandomBlock(bool aBottom);
+    bool launchRandomBlock(bool aBottom);
 
     /// return if anything changed on the playfield since last call
     bool isDirty() { return dirty; }
