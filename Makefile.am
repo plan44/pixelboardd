@@ -116,4 +116,6 @@ pixelboardd_SOURCES = \
   src/Blocks/blocks.hpp \
   src/Display/display.cpp \
   src/Display/display.hpp \
+  src/pixelpage.cpp \
+  src/pixelpage.hpp \
   src/pixelboardd_main.cpp

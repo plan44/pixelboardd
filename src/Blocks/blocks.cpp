@@ -51,9 +51,60 @@ static const BlockDef blockDefs[numBlockTypes] = {
 };
 
 
+typedef struct {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+} ColorDef;
+
+
+static const ColorDef colorDefs[33] = {
+  // falling top down
+  {   0,   0,   0 }, // none
+  { 255,   0,   0 }, // line
+  { 100, 255,   0 }, // square
+  {   0, 100, 255 }, // L
+  {   0, 255, 100 }, // L reverse
+  {   0,   0, 255 }, // T
+  { 100,   0, 255 }, // squiggly
+  { 255,   0, 100 }, // squiggly reversed
+  // rising bottom up
+  {   0,   0,   0 }, // none
+  { 255,   0,   0 }, // line
+  { 100, 255,   0 }, // square
+  {   0, 100, 255 }, // L
+  {   0, 255, 100 }, // L reverse
+  {   0,   0, 255 }, // T
+  { 100,   0, 255 }, // squiggly
+  { 255,   0, 100 }, // squiggly reversed
+  // DIMMED: falling top down
+  {   0,   0,   0 }, // none
+  { 255,   0,   0 }, // line
+  { 100, 255,   0 }, // square
+  {   0, 100, 255 }, // L
+  {   0, 255, 100 }, // L reverse
+  {   0,   0, 255 }, // T
+  { 100,   0, 255 }, // squiggly
+  { 255,   0, 100 }, // squiggly reversed
+  // DIMMED: rising bottom up
+  {   0,   0,   0 }, // none
+  { 255,   0,   0 }, // line
+  { 100, 255,   0 }, // square
+  {   0, 100, 255 }, // L
+  {   0, 255, 100 }, // L reverse
+  {   0,   0, 255 }, // T
+  { 100,   0, 255 }, // squiggly
+  { 255,   0, 100 }, // squiggly reversed
+  // Row kill flash
+  { 255, 255, 255 }
+};
+
+
+
+
 // MARK: ===== Block
 
-Block::Block(PlayField &aPlayField, BlockType aBlockType, ColorCode aColorCode) :
+Block::Block(BlocksPage &aPlayField, BlockType aBlockType, ColorCode aColorCode) :
   playField(aPlayField),
   blockType(aBlockType),
   colorCode(aColorCode),
@@ -120,7 +171,7 @@ void Block::remove()
   if (shown) {
     shown = false;
     while (getPositionedPixel(idx, x, y, orientation, px, py)) {
-      playField.setColorAt(0, px, py);
+      playField.setColorCodeAt(0, px, py);
       idx++;
     }
   }
@@ -134,7 +185,7 @@ void Block::show()
   if (!shown) {
     shown = true;
     while (getPositionedPixel(idx, x, y, orientation, px, py)) {
-      playField.setColorAt(colorCode, px, py);
+      playField.setColorCodeAt(colorCode, px, py);
       idx++;
     }
   }
@@ -147,7 +198,7 @@ void Block::dim()
   int idx=0;
   shown = true;
   while (getPositionedPixel(idx, x, y, orientation, px, py)) {
-    playField.setColorAt(colorCode | 0x10, px, py);
+    playField.setColorCodeAt(colorCode | 0x10, px, py);
     idx++;
   }
 }
@@ -163,7 +214,7 @@ bool Block::position(int aX, int aY, int aOrientation, bool aOpenAtBottom)
   remove();
   // check that new position is free
   while (getPositionedPixel(idx, aX, aY, aOrientation, px, py)) {
-    if (!playField.isWithin(px, py, true, aOpenAtBottom) || playField.colorAt(px, py)!=0) {
+    if (!playField.isWithinPlayfield(px, py, true, aOpenAtBottom) || playField.colorCodeAt(px, py)!=0) {
       // collision or not within field
       if (wasShown) {
         // show again at previous position
@@ -195,23 +246,23 @@ bool Block::move(int aDx, int aDy, int aRot, bool aOpenAtBottom)
 
 
 
-// MARK: ===== PlayField
+// MARK: ===== BlocksPage
 
 
-PlayField::PlayField() :
-  dirty(false),
+BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
+  inherited("blocks", aInfoCallback),
   stepInterval(0.7*Second),
   dropStepInterval(0.05*Second),
-  rowKillDelay(0.05*Second)
+  rowKillDelay(0.15*Second)
 {
-  clear();
+  stop();
 }
 
 
-void PlayField::clear(ColorCode aFillColor)
+void BlocksPage::stop()
 {
-  for (int i=0; i<PLAYFIELD_NUMPIXELS; ++i) {
-    colorCodes[i] = aFillColor;
+  for (int i=0; i<PAGE_NUMPIXELS; ++i) {
+    colorCodes[i] = 0;
   }
   // remove block if any is already running
   for (int bi=0; bi<2; bi++) {
@@ -222,40 +273,81 @@ void PlayField::clear(ColorCode aFillColor)
 }
 
 
-void PlayField::restart(bool aTwoPlayer)
+void BlocksPage::start(bool aTwoSided)
 {
-  clear();
+  stop();
   launchRandomBlock(false);
-  if (aTwoPlayer) {
+  if (aTwoSided) {
     launchRandomBlock(true);
   }
 }
 
 
-bool PlayField::isWithin(int aX, int aY, bool aOpen, bool aOpenAtBottom)
+
+PixelColor BlocksPage::colorAt(int aX, int aY)
 {
-  if (aX<0 || aX>=PLAYFIELD_NUMCOLS) return false; // may not extend sidewards
-  if ((aOpenAtBottom || !aOpen) && aY>=PLAYFIELD_NUMROWS) return false; // may not extend above playfield
+  uint8_t cc = colorCodeAt(aX, aY);
+  PixelColor pix;
+  const ColorDef *cdef = &colorDefs[cc];
+  pix.r = cdef->r;
+  pix.g = cdef->g;
+  pix.b = cdef->b;
+  if (cc>=16 && cc<32) {
+    pix.r = pix.r*3/4;
+    pix.g = pix.g*3/4;
+    pix.b = pix.b*3/4;
+  }
+  return pix;
+}
+
+
+bool BlocksPage::isWithinPlayfield(int aX, int aY, bool aOpen, bool aOpenAtBottom)
+{
+  if (aX<0 || aX>=PAGE_NUMCOLS) return false; // may not extend sidewards
+  if ((aOpenAtBottom || !aOpen) && aY>=PAGE_NUMROWS) return false; // may not extend above playfield
   if ((!aOpenAtBottom || !aOpen) && aY<0) return false; // may not extend below playfield
   return true; // within
 }
 
 
-ColorCode PlayField::colorAt(int aX, int aY)
+ColorCode BlocksPage::colorCodeAt(int aX, int aY)
 {
   if (!isWithin(aX, aY)) return 0;
-  return colorCodes[aY*PLAYFIELD_NUMCOLS+aX];
+  return colorCodes[aY*PAGE_NUMCOLS+aX];
 }
 
 
-void PlayField::setColorAt(ColorCode aColorCode, int aX, int aY)
+void BlocksPage::setColorCodeAt(ColorCode aColorCode, int aX, int aY)
 {
   if (!isWithin(aX, aY)) return;
-  colorCodes[aY*PLAYFIELD_NUMCOLS+aX] = aColorCode;
+  colorCodes[aY*PAGE_NUMCOLS+aX] = aColorCode;
 }
 
 
-bool PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom)
+void BlocksPage::handleKey(int aSide, int aKeyNum)
+{
+  int movement = 0;
+  int rotation = 0;
+  bool drop = false;
+  switch (aKeyNum) {
+    case 0 : movement = -1; break; // left
+    case 1 : rotation = 1; break; // turn
+    case 2 : drop = true; break; // drop
+    case 3 : movement = 1; break; // right
+  }
+  // movement X is right edge, so need to swap for bottom end keys
+  if (aSide==0) movement = -movement;
+  if (movement!=0 || rotation!=0) {
+    moveBlock(movement, rotation, aSide==1);
+  }
+  if (drop) {
+    dropBlock(aSide==1);
+  }
+}
+
+
+
+bool BlocksPage::launchBlock(BlockType aBlockType, int aColumn, int aOrientation, bool aBottom)
 {
   BlockRunner *b = &activeBlocks[aBottom ? 1 : 0];
   // remove block if any is already running
@@ -269,11 +361,11 @@ bool PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation,
   b->block->getExtents(aBottom ? (aOrientation+2) % 4 : aOrientation, minx, maxx, miny, maxy);
   // make sure it is within horizontal bounds
   if (aColumn+minx<0) aColumn = -minx;
-  else if (aColumn+maxx>=PLAYFIELD_NUMCOLS) aColumn = PLAYFIELD_NUMCOLS-1-maxx;
+  else if (aColumn+maxx>=PAGE_NUMCOLS) aColumn = PAGE_NUMCOLS-1-maxx;
   // position vertically with first pixel just visible
   int row;
   if (!aBottom) {
-    row = PLAYFIELD_NUMROWS-1+miny;
+    row = PAGE_NUMROWS-1+miny;
   }
   else {
     row = -maxy;
@@ -291,17 +383,17 @@ bool PlayField::launchBlock(BlockType aBlockType, int aColumn, int aOrientation,
 
 
 
-bool PlayField::launchRandomBlock(bool aBottom)
+bool BlocksPage::launchRandomBlock(bool aBottom)
 {
   BlockType bt = (BlockType)(rand() % numBlockTypes);
-  //  int col = rand() % PLAYFIELD_NUMCOLS;
+  //  int col = rand() % PAGE_NUMCOLS;
   int col = 5; // always the same
   return launchBlock(bt, col, 0, aBottom);
 }
 
 
 
-void PlayField::removeRow(int aY, bool aBlockFromBottom)
+void BlocksPage::removeRow(int aY, bool aBlockFromBottom)
 {
   // unshow running blocks
   for (int i=0; i<2; i++) {
@@ -310,9 +402,9 @@ void PlayField::removeRow(int aY, bool aBlockFromBottom)
   }
   // move towards falling direction of block that has caused the row to fill
   int dir = aBlockFromBottom ? -1 : 1;
-  for (int y=aY; (aBlockFromBottom ? y>=0 : y<PLAYFIELD_NUMROWS); y += dir) {
-    for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
-      setColorAt(colorAt(x, y+dir), x, y);
+  for (int y=aY; (aBlockFromBottom ? y>=0 : y<PAGE_NUMROWS); y += dir) {
+    for (int x=0; x<PAGE_NUMCOLS; x++) {
+      setColorCodeAt(colorCodeAt(x, y+dir), x, y);
     }
   }
   // re-show running blocks
@@ -321,30 +413,32 @@ void PlayField::removeRow(int aY, bool aBlockFromBottom)
     if (b->block) b->block->show();
   }
   // ccontinue checking
-  MainLoop::currentMainLoop().executeOnce(boost::bind(&PlayField::checkRows, this, aBlockFromBottom), rowKillDelay);
-  dirty = true;
+  MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom), rowKillDelay);
+  makeDirty();
 }
 
 
-void PlayField::checkRows(bool aBlockFromBottom)
+void BlocksPage::checkRows(bool aBlockFromBottom)
 {
-  for (int y=0; y<PLAYFIELD_NUMROWS; y++) {
+  // check from top to bottom relative to falling block
+  int dir = aBlockFromBottom ? -1 : 1;
+  for (int y = aBlockFromBottom ? PAGE_NUMROWS-1 : 0; (aBlockFromBottom ? y>=0 : y<PAGE_NUMROWS); y += dir) {
     // check each row
     bool hasGap = false;
-    for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
-      if (colorAt(x, y)==0) {
+    for (int x=0; x<PAGE_NUMCOLS; x++) {
+      if (colorCodeAt(x, y)==0) {
         hasGap = true;
         break;
       }
     }
     if (!hasGap) {
       // full row found
-      for (int x=0; x<PLAYFIELD_NUMCOLS; x++) {
+      for (int x=0; x<PAGE_NUMCOLS; x++) {
         // light up
-        setColorAt(32, x, y); // row flash
+        setColorCodeAt(32, x, y); // row flash
       }
-      dirty = true;
-      MainLoop::currentMainLoop().executeOnce(boost::bind(&PlayField::removeRow, this, y, aBlockFromBottom), rowKillDelay);
+      makeDirty();
+      MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom), rowKillDelay);
       break;
     }
   }
@@ -352,9 +446,8 @@ void PlayField::checkRows(bool aBlockFromBottom)
 
 
 
-bool PlayField::step()
+bool BlocksPage::step()
 {
-  dirty = false;
   MLMicroSeconds now = MainLoop::now();
   for (int i=0; i<2; i++) {
     BlockRunner *b = &activeBlocks[i];
@@ -362,11 +455,11 @@ bool PlayField::step()
       if (now>=b->lastStep+b->stepInterval) {
         if (b->block->move(0, b->movingUp ? 1 : -1, 0, b->movingUp)) {
           b->lastStep = now;
-          dirty = true;
+          makeDirty();
         }
         else {
           // could not move, means that we've collided with floor or existing pixels
-          dirty = true;
+          makeDirty();
           b->block->dim();
           checkRows(b->movingUp);
           // remove block (but pixels will remain)
@@ -379,21 +472,22 @@ bool PlayField::step()
       }
     }
   }
-  return dirty;
+  return false; // no need to call again immediately
 }
 
 
-void PlayField::moveBlock(int aDx, int aRot, bool aLower)
+void BlocksPage::moveBlock(int aDx, int aRot, bool aLower)
 {
   BlockRunner *b = &activeBlocks[aLower ? 1 : 0];
   if (b->block) {
-    if (b->block->move(aDx, 0, aRot, aLower))
-      dirty = true;
+    if (b->block->move(aDx, 0, aRot, aLower)) {
+      makeDirty();
+    }
   }
 }
 
 
-void PlayField::dropBlock(bool aLower)
+void BlocksPage::dropBlock(bool aLower)
 {
   BlockRunner *b = &activeBlocks[aLower ? 1 : 0];
   if (b->block) {

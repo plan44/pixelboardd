@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED23829E1E1190F500F1FE4F /* pixelpage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23829B1E117BD000F1FE4F /* pixelpage.cpp */; };
 		ED5372601DFC28D00066FF5A /* pixelboardd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */; };
 		ED53729B1DFC2CBE0066FF5A /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372671DFC2CBE0066FF5A /* application.cpp */; };
 		ED53729C1DFC2CBE0066FF5A /* colorutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372691DFC2CBE0066FF5A /* colorutils.cpp */; };
@@ -55,6 +56,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED23829B1E117BD000F1FE4F /* pixelpage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pixelpage.cpp; sourceTree = "<group>"; };
+		ED23829C1E117BD000F1FE4F /* pixelpage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pixelpage.hpp; sourceTree = "<group>"; };
 		ED53725C1DFC28D00066FF5A /* pixelboardd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pixelboardd; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pixelboardd_main.cpp; sourceTree = "<group>"; };
 		ED5372671DFC2CBE0066FF5A /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
@@ -160,6 +163,8 @@
 				ED5372661DFC2C6D0066FF5A /* p44utils */,
 				ED8E64631DFDC62A00B66723 /* Blocks */,
 				ED8E64621DFDC61800B66723 /* Display */,
+				ED23829B1E117BD000F1FE4F /* pixelpage.cpp */,
+				ED23829C1E117BD000F1FE4F /* pixelpage.hpp */,
 				ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */,
 			);
 			path = src;
@@ -359,6 +364,7 @@
 				ED5372A41DFC2CBE0066FF5A /* iopin.cpp in Sources */,
 				ED5372B11DFC2CBE0066FF5A /* spi.cpp in Sources */,
 				EDA21EE11E0EC201009E276B /* display.cpp in Sources */,
+				ED23829E1E1190F500F1FE4F /* pixelpage.cpp in Sources */,
 				ED5372AD1DFC2CBE0066FF5A /* persistentparams.cpp in Sources */,
 				ED5372A71DFC2CBE0066FF5A /* jsonrpccomm.cpp in Sources */,
 				ED5372A21DFC2CBE0066FF5A /* httpcomm.cpp in Sources */,

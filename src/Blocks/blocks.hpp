@@ -22,17 +22,13 @@
 #ifndef __pixelboardd_blocks_hpp__
 #define __pixelboardd_blocks_hpp__
 
-#include "ledchaincomm.hpp"
+#include "pixelpage.hpp"
+
 
 namespace p44 {
 
 
-  #define PLAYFIELD_NUMCOLS 10
-  #define PLAYFIELD_NUMROWS 20
-
-
-
-  class PlayField;
+  class BlocksPage;
 
   typedef struct {
     uint8_t r;
@@ -58,7 +54,7 @@ namespace p44 {
   class Block : public P44Obj
   {
 
-    PlayField &playField; ///< the playfield
+    BlocksPage &playField; ///< the playfield
     ColorCode colorCode; ///< the color code of the piece
     int x; ///< X coordinate of the (rotation) center of the piece
     int y; ///< Y coordinate of the (rotation) center of the piece
@@ -68,7 +64,7 @@ namespace p44 {
 
   public:
 
-    Block(PlayField &aPlayField, BlockType aBlockType, ColorCode aColorCode = 0);
+    Block(BlocksPage &aPlayField, BlockType aBlockType, ColorCode aColorCode = 0);
 
     /// remove from playfield
     void remove();
@@ -120,11 +116,9 @@ namespace p44 {
 
 
 
-  #define PLAYFIELD_NUMPIXELS (PLAYFIELD_NUMCOLS*PLAYFIELD_NUMROWS)
-
   class BlockRunner
   {
-    friend class PlayField;
+    friend class BlocksPage;
 
     BlockPtr block;
     MLMicroSeconds lastStep;
@@ -133,14 +127,14 @@ namespace p44 {
   };
 
 
-  class PlayField : public P44Obj
+  class BlocksPage : public PixelPage
   {
+    typedef PixelPage inherited;
+    friend class Block;
 
-    ColorCode colorCodes[PLAYFIELD_NUMPIXELS]; ///< internal representation
+    ColorCode colorCodes[PAGE_NUMPIXELS]; ///< internal representation
 
     BlockRunner activeBlocks[2]; ///< the max 2 active blocks (top and bottom)
-
-    bool dirty;
 
   public :
 
@@ -149,30 +143,47 @@ namespace p44 {
     MLMicroSeconds rowKillDelay;
 
 
-    PlayField();
+    BlocksPage(PixelPageInfoCB aInfoCallback);
 
-    /// clear entire field
-    void clear(ColorCode aFillColor = 0);
+    /// (re)start
+    /// @param aTwoSided if set, pieces fall from both sides
+    virtual void start(bool aTwoSided) P44_OVERRIDE;
 
-    /// restart
-    /// @param aTwoPlayer if set, pieces fall from both sides
-    void restart(bool aTwoPlayer);
+    /// stop
+    virtual void stop() P44_OVERRIDE;
+
+    /// calculate changes on the display, return true if any
+    /// @return true if complete, false if step() would like to be called immediately again
+    /// @note this is called on the active page at least once per mainloop cycle
+    virtual bool step() P44_OVERRIDE;
+
+    /// handle key events
+    /// @param aSide which side of the board (0=bottom, 1=top)
+    /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
+    virtual void handleKey(int aSide, int aKeyNum) P44_OVERRIDE;
 
     /// get color at X,Y
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
-    ColorCode colorAt(int aX, int aY);
+    virtual PixelColor colorAt(int aX, int aY) P44_OVERRIDE;
+
+  protected:
+
+    /// get color at X,Y
+    /// @param aX PlayField X coordinate
+    /// @param aY PlayField Y coordinate
+    ColorCode colorCodeAt(int aX, int aY);
 
     /// set color at X,Y
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
-    void setColorAt(ColorCode aColorCode, int aX, int aY);
+    void setColorCodeAt(ColorCode aColorCode, int aX, int aY);
 
     /// check if X,Y is within (or ouside above/below) playfield
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
     /// @param aOpenAtBottom if set, playfield is considered open at the bottom
-    bool isWithin(int aX, int aY, bool aOpen = false, bool aOpenAtBottom = false);
+    bool isWithinPlayfield(int aX, int aY, bool aOpen = false, bool aOpenAtBottom = false);
 
     /// launch a block into the playfield
     /// @param aBlockType the type of block
@@ -183,14 +194,7 @@ namespace p44 {
 
     /// launch new random block
     bool launchRandomBlock(bool aBottom);
-
-    /// return if anything changed on the playfield since last call
-    bool isDirty() { return dirty; }
-
-    /// calculate changes on the playfield, return true if any
-    /// @return true if anything has changed (so display refresh is needed)
-    bool step();
-
+    
     /// move block
     void moveBlock(int aDx, int aRot, bool aLower);
 
@@ -204,7 +208,7 @@ namespace p44 {
 
 
   };
-  typedef boost::intrusive_ptr<PlayField> PlayFieldPtr;
+  typedef boost::intrusive_ptr<BlocksPage> BlocksPagePtr;
 
 
 

@@ -71,7 +71,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--display /Volumes/OpenWRT/openwrt/feeds/plan44/pixelboard-config/files/www/images/xmas.png"
+            argument = "--image /Volumes/OpenWRT/openwrt/feeds/plan44/pixelboard-config/files/www/images/xmas.png"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--defaultpage display"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

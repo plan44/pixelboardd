@@ -26,7 +26,7 @@
 #include "i2c.hpp"
 #include "jsoncomm.hpp"
 
-
+// Pages
 #include "blocks.hpp"
 #include "display.hpp"
 
@@ -36,54 +36,7 @@ using namespace p44;
 #define DEFAULT_LOGLEVEL LOG_NOTICE
 
 
-typedef struct {
-  uint8_t r;
-  uint8_t g;
-  uint8_t b;
-} ColorDef;
-
-static const ColorDef colorDefs[33] = {
-  // falling top down
-  {   0,   0,   0 }, // none
-  { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
-  {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
-  // rising bottom up
-  {   0,   0,   0 }, // none
-  { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
-  {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
-  // DIMMED: falling top down
-  {   0,   0,   0 }, // none
-  { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
-  {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
-  // DIMMED: rising bottom up
-  {   0,   0,   0 }, // none
-  { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
-  {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
-  // Row kill flash
-  { 255, 255, 255 }
-};
-
-
+typedef std::map<string, PixelPagePtr> PagesMap;
 
 /// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
 class PixelBoardD : public CmdLineApp
@@ -91,8 +44,6 @@ class PixelBoardD : public CmdLineApp
   typedef CmdLineApp inherited;
 
   LEDChainCommPtr display;
-
-  PlayFieldPtr playfield;
 
   ButtonInputPtr lower_left;
   ButtonInputPtr lower_right;
@@ -107,15 +58,22 @@ class PixelBoardD : public CmdLineApp
   // API Server
   SocketCommPtr apiServer;
 
-  // Q&D
-  DisplayPtr dsp;
-  int mode; // 0=display, 1=blocks
+  // The display pages
+  string defaultPageName;
+  bool defaultTwoSided;
+  PagesMap pages;
+  PixelPagePtr currentPage; ///< the current page
+
+  // pages
+  DisplayPagePtr displayPage;
+  BlocksPagePtr blocksPage;
+
   MLMicroSeconds starttime;
+
 
 public:
 
   PixelBoardD() :
-    mode(0),
     starttime(MainLoop::now())
   {
   }
@@ -130,8 +88,9 @@ public:
       { 0  , "notouch",        false, "disable touch pad checking" },
       { 0  , "jsonapiport",    true,  "port;server port number for JSON API (default=none)" },
       { 0  , "jsonapinonlocal",false, "allow JSON API from non-local clients" },
-      { 0  , "two",            false, "cooperative two-player game" },
-      { 0  , "display",        true,  "filename;show image" },
+      { 0  , "defaultpage",    true,  "display page;default page to show after start and after other page ends" },
+      { 0  , "twosided",       false, "defines if default page should run two-sided" },
+      { 0  , "image",          true,  "filename;image to show by default on display page" },
       { 'l', "loglevel",       true,  "level;set max level of log message detail to show on stdout" },
       { 0  , "errlevel",       true,  "level;set max level for log messages to go to stderr as well" },
       { 0  , "dontlogerrors",  false, "don't duplicate error messages (see --errlevel) on stdout" },
@@ -172,24 +131,30 @@ public:
         apiServer->startServer(boost::bind(&PixelBoardD::apiConnectionHandler, this, _1), 3);
       }
 
-      string bgimage;
-      if (getStringOption("display", bgimage)) {
-        dsp = DisplayPtr(new Display());
-        dsp->loadPNGBackground(bgimage);
-      }
+      getStringOption("defaultpage", defaultPageName);
+      defaultTwoSided = getOption("twosided");
 
-      playfield = PlayFieldPtr(new PlayField);
+      // add pages
+      // - display
+      displayPage = DisplayPagePtr(new DisplayPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
+      string img;
+      if (getStringOption("image", img)) {
+        displayPage->loadPNGBackground(img);
+      }
+      // - blocks
+      blocksPage = BlocksPagePtr(new BlocksPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
+
 
       if (getOption("consolekeys")) {
         // create the console keys
         lower_left = ButtonInputPtr(new ButtonInput("simpin.left:j"));
-        lower_left->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, 1, 0, false), false); // left
+        lower_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 0), false); // left
         lower_right = ButtonInputPtr(new ButtonInput("simpin.right:l"));
-        lower_right->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, -1, 0, false), false); // right
+        lower_right->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 3), false); // right
         lower_turn = ButtonInputPtr(new ButtonInput("simpin.turn:k"));
-        lower_turn->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, 0, 1, false), false); // turn
+        lower_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 1), false); // turn
         lower_drop = ButtonInputPtr(new ButtonInput("simpin.drop:m"));
-        lower_drop->setButtonHandler(boost::bind(&PixelBoardD::controlHandler, this, false, 0, 0, true), false); // drop
+        lower_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 2), false); // drop
       }
 
       // create the touch pad controls
@@ -211,24 +176,58 @@ public:
   }
 
 
+  void gotoPage(const string aPageName, bool aTwoSided)
+  {
+    PagesMap::iterator pos = pages.find(aPageName);
+    if (pos!=pages.end()) {
+      // stop current page
+      if (currentPage) {
+        currentPage->stop();
+      }
+      // start new one
+      currentPage = pos->second;
+      currentPage->start(aTwoSided);
+    }
+  }
+
+
+
+  virtual void pageInfoHandler(PixelPage &aPage, const string aInfo)
+  {
+    LOG(LOG_INFO, "Page '%s' sends info '%s'", aPage.getName().c_str(), aInfo.c_str());
+    if (aInfo=="register") {
+      pages[aPage.getName()] = PixelPagePtr(&aPage);
+    }
+    else if (aInfo=="unregister") {
+      PagesMap::iterator pos = pages.find(aPage.getName());
+      if (pos!=pages.end()) {
+        if (currentPage==pos->second) {
+          currentPage = NULL;
+        }
+        pages.erase(pos);
+      }
+    }
+    else if (aInfo=="quit") {
+      if (aPage.getName()=="display") {
+        gotoPage("blocks", defaultTwoSided);
+      }
+      else {
+        // back to default page
+        gotoPage(defaultPageName, defaultTwoSided);
+      }
+    }
+  }
+
+
+
   virtual void initialize()
   {
     srand((unsigned)MainLoop::currentMainLoop().now()*4223);
     display->begin();
     display->show();
     MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
-    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::refreshDsp, this), 2*Second);
+    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::gotoPage, this, defaultPageName, defaultTwoSided), 2*Second);
   }
-
-
-
-
-  void play(bool aTwoPlayer)
-  {
-    playfield->restart(aTwoPlayer);
-    refreshPlayfield();
-  }
-
 
 
   SocketCommPtr apiConnectionHandler(SocketCommPtr aServerSocketComm)
@@ -302,18 +301,18 @@ public:
     ErrorPtr err;
     JsonObjectPtr o;
     if (aUri=="player1" || aUri=="player2") {
-      bool lower = aUri=="player2";
+      int side = aUri=="player2" ? 1 : 0;
       if (aIsAction) {
         if (aData->get("key", o)) {
           string key = o->stringValue();
           if (key=="left")
-            controlHandler(lower, 1, 0, false); // left
+            keyHandler(side, 0); // left
           else if (key=="right")
-            controlHandler(lower, -1, 0, false); // right
+            keyHandler(side, 3); // right
           else if (key=="turn")
-            controlHandler(lower, 0, 1, false); // turn
+            keyHandler(side, 1); // turn
           else if (key=="drop")
-            controlHandler(lower, 0, 0, true); // drop
+            keyHandler(side, 2); // drop
         }
       }
     }
@@ -324,7 +323,7 @@ public:
           twoSided = o->boolValue();
         if (aData->get("page", o)) {
           string page = o->stringValue();
-          showPage(page, twoSided);
+          gotoPage(page, twoSided);
         }
       }
     }
@@ -351,8 +350,9 @@ public:
     if (aData->get("cmd", o)) {
       cmd = o->stringValue();
       if (cmd=="imageupload") {
-        dsp->loadPNGBackground(aUploadedFile);
-        refreshDsp();
+        displayPage->loadPNGBackground(aUploadedFile);
+        gotoPage("display", false);
+        updateDisplay();
       }
       else {
         err = WebError::webErr(500, "Unknown upload cmd '%s'", cmd.c_str());
@@ -360,21 +360,6 @@ public:
     }
     return err;
   }
-
-
-  void showPage(const string page, bool aTwoSided)
-  {
-    // FIXME: Q&D now
-    if (page=="blocks") {
-      mode=1;
-      play(aTwoSided);
-    }
-    else if (page=="display") {
-      mode=0;
-    }
-  }
-
-
 
 
   void checkInputs()
@@ -389,83 +374,53 @@ public:
         triggers = newState & ~touchState[side];
         LOG(triggers ? LOG_INFO : LOG_DEBUG, "checkInputs: side=%d, touchState=0x%02X, newState=0x%02X, triggers=0x%02X", side, touchState[side], newState, triggers);
         touchState[side] = newState;
-        if (triggers & 0x02) controlHandler(side==1, 1, 0, false); // left
-        else if (triggers & 0x10) controlHandler(side==1, -1, 0, false); // right
-        else if (triggers & 0x04) controlHandler(side==1, 0, 1, false); // turn
-        else if (triggers & 0x08) controlHandler(side==1, 0, 0, true); // drop
+        if (triggers & 0x02) keyHandler(side, 0); // left
+        else if (triggers & 0x10) keyHandler(side, 1); // right
+        else if (triggers & 0x04) keyHandler(side, 2); // turn
+        else if (triggers & 0x04) keyHandler(side, 3); // drop
       }
+      updateDisplay();
     }
   }
 
 
-  void refreshPlayfield()
+
+
+  void updateDisplay()
   {
-    for (int x=0; x<10; x++) {
-      for (int y=0; y<20; y++) {
-        uint8_t cc = playfield->colorAt(x, y);
-        int r,g,b;
-        const ColorDef *cdef = &colorDefs[cc];
-        r = cdef->r;
-        g = cdef->g;
-        b = cdef->b;
-        if (cc>=16 && cc<32) {
-          r = r*3/4;
-          g = g*3/4;
-          b = b*3/4;
+    if (currentPage && currentPage->isDirty()) {
+      for (int x=0; x<10; x++) {
+        for (int y=0; y<20; y++) {
+          PixelColor p = currentPage->colorAt(x, y);
+          display->setColorXY(x, y, p.r, p.g, p.b);
         }
-        display->setColorXY(x, y, r, g, b);
       }
+      display->show();
+      currentPage->updated();
     }
-    display->show();
-  }
-
-
-  void refreshDsp()
-  {
-    for (int x=0; x<10; x++) {
-      for (int y=0; y<20; y++) {
-        RGBWebColor p = dsp->colorAt(x, y);
-        display->setColorXY(x, y, p.r, p.g, p.b);
-      }
-    }
-    display->show();
   }
 
 
 
   bool step()
   {
-    if (mode!=0) {
-      if (playfield->step()) {
-        refreshPlayfield();
-      }
+    bool completed = true;
+    if (currentPage) {
+      completed = currentPage->step();
     }
     checkInputs();
-    return true; // completed for this cycle (10mS)
+    updateDisplay();
+    return completed;
   }
 
 
-  void controlHandler(bool aLower, int aMovement, int aRotation, bool aDrop)
+  void keyHandler(int aSide, int aKeyNum)
   {
-    if (mode==0 && starttime+15*Second<=MainLoop::now()) {
-      mode=1;
-      play(getOption("two"));
+    if (currentPage) {
+      currentPage->handleKey(aSide, aKeyNum);
     }
-    else {
-      // left/right is always seen from bottom end, so needs to be swapped if aLower
-      if (aLower) aMovement = -aMovement;
-      if (aMovement!=0 || aRotation!=0) {
-        playfield->moveBlock(aMovement, aRotation, aLower);
-      }
-      if (aDrop) {
-        playfield->dropBlock(aLower);
-      }
-      if (playfield->isDirty()) {
-        refreshPlayfield();
-      }
-    }
+    updateDisplay();
   }
-  
 
 
 };
