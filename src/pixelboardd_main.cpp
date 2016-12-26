@@ -188,6 +188,7 @@ public:
       currentPage = pos->second;
       currentPage->start(aTwoSided);
     }
+    updateDisplay();
   }
 
 

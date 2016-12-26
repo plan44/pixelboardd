@@ -135,12 +135,19 @@ namespace p44 {
     ColorCode colorCodes[PAGE_NUMPIXELS]; ///< internal representation
 
     BlockRunner activeBlocks[2]; ///< the max 2 active blocks (top and bottom)
+    int score[2]; ///< the score for the players
+
+    bool isGameOver; ///< set when game is over
+    MLMicroSeconds gameOverAt;
+
+    long rowKillTicket;
 
   public :
 
     MLMicroSeconds stepInterval;
     MLMicroSeconds dropStepInterval;
     MLMicroSeconds rowKillDelay;
+    MLMicroSeconds gameOverPause;
 
 
     BlocksPage(PixelPageInfoCB aInfoCallback);
@@ -203,6 +210,8 @@ namespace p44 {
 
   private:
 
+    void clear();
+    void gameOver();
     void removeRow(int aY, bool aBlockFromBottom);
     void checkRows(bool aBlockFromBottom);
 

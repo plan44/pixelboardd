@@ -253,22 +253,20 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   inherited("blocks", aInfoCallback),
   stepInterval(0.7*Second),
   dropStepInterval(0.05*Second),
-  rowKillDelay(0.15*Second)
+  rowKillDelay(0.15*Second),
+  gameOverPause(5*Second),
+  isGameOver(false),
+  gameOverAt(Never)
 {
   stop();
 }
 
 
-void BlocksPage::stop()
+void BlocksPage::clear()
 {
+  stop();
   for (int i=0; i<PAGE_NUMPIXELS; ++i) {
     colorCodes[i] = 0;
-  }
-  // remove block if any is already running
-  for (int bi=0; bi<2; bi++) {
-    BlockRunner *b = &activeBlocks[bi];
-    if (b->block) b->block->remove();
-    b->block = NULL;
   }
 }
 
@@ -276,10 +274,34 @@ void BlocksPage::stop()
 void BlocksPage::start(bool aTwoSided)
 {
   stop();
+  clear();
+  isGameOver = false;
   launchRandomBlock(false);
   if (aTwoSided) {
     launchRandomBlock(true);
   }
+}
+
+
+void BlocksPage::stop()
+{
+  MainLoop::currentMainLoop().cancelExecutionTicket(rowKillTicket);
+  // remove block if any is still running
+  for (int bi=0; bi<2; bi++) {
+    // clear runners
+    BlockRunner *b = &activeBlocks[bi];
+    if (b->block) b->block->dim(); // dim it, no longer live
+    b->block = NULL; // forget it
+  }
+}
+
+
+
+void BlocksPage::gameOver()
+{
+  isGameOver = true;
+  gameOverAt = MainLoop::now();
+  makeDirty();
 }
 
 
@@ -292,7 +314,12 @@ PixelColor BlocksPage::colorAt(int aX, int aY)
   pix.r = cdef->r;
   pix.g = cdef->g;
   pix.b = cdef->b;
-  if (cc>=16 && cc<32) {
+  if (isGameOver) {
+    pix.r = pix.r*1/2;
+    pix.g = pix.g*1/2;
+    pix.b = pix.b*1/2;
+  }
+  else if (cc>=16 && cc<32) {
     pix.r = pix.r*3/4;
     pix.g = pix.g*3/4;
     pix.b = pix.b*3/4;
@@ -326,22 +353,33 @@ void BlocksPage::setColorCodeAt(ColorCode aColorCode, int aX, int aY)
 
 void BlocksPage::handleKey(int aSide, int aKeyNum)
 {
-  int movement = 0;
-  int rotation = 0;
-  bool drop = false;
-  switch (aKeyNum) {
-    case 0 : movement = -1; break; // left
-    case 1 : rotation = 1; break; // turn
-    case 2 : drop = true; break; // drop
-    case 3 : movement = 1; break; // right
+  if (isGameOver && MainLoop::now()>gameOverAt+gameOverPause) {
+    // left or right restarts, drop exits
+    if (aKeyNum==2) {
+      postInfo("quit");
+    }
+    else {
+      start(aSide==1);
+    }
   }
-  // movement X is right edge, so need to swap for bottom end keys
-  if (aSide==0) movement = -movement;
-  if (movement!=0 || rotation!=0) {
-    moveBlock(movement, rotation, aSide==1);
-  }
-  if (drop) {
-    dropBlock(aSide==1);
+  else {
+    int movement = 0;
+    int rotation = 0;
+    bool drop = false;
+    switch (aKeyNum) {
+      case 0 : movement = -1; break; // left
+      case 1 : rotation = 1; break; // turn
+      case 2 : drop = true; break; // drop
+      case 3 : movement = 1; break; // right
+    }
+    // movement X is right edge, so need to swap for bottom end keys
+    if (aSide==0) movement = -movement;
+    if (movement!=0 || rotation!=0) {
+      moveBlock(movement, rotation, aSide==1);
+    }
+    if (drop) {
+      dropBlock(aSide==1);
+    }
   }
 }
 
@@ -413,7 +451,7 @@ void BlocksPage::removeRow(int aY, bool aBlockFromBottom)
     if (b->block) b->block->show();
   }
   // ccontinue checking
-  MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom), rowKillDelay);
+  rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom), rowKillDelay);
   makeDirty();
 }
 
@@ -438,7 +476,7 @@ void BlocksPage::checkRows(bool aBlockFromBottom)
         setColorCodeAt(32, x, y); // row flash
       }
       makeDirty();
-      MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom), rowKillDelay);
+      rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom), rowKillDelay);
       break;
     }
   }
@@ -449,30 +487,38 @@ void BlocksPage::checkRows(bool aBlockFromBottom)
 bool BlocksPage::step()
 {
   MLMicroSeconds now = MainLoop::now();
-  for (int i=0; i<2; i++) {
-    BlockRunner *b = &activeBlocks[i];
-    if (b->block) {
-      if (now>=b->lastStep+b->stepInterval) {
-        if (b->block->move(0, b->movingUp ? 1 : -1, 0, b->movingUp)) {
-          b->lastStep = now;
-          makeDirty();
-        }
-        else {
-          // could not move, means that we've collided with floor or existing pixels
-          makeDirty();
-          b->block->dim();
-          checkRows(b->movingUp);
-          // remove block (but pixels will remain)
-          b->block = NULL;
-          // start new one
-          if (!launchRandomBlock(b->movingUp)) {
-            // TODO: Game over for this player
+  if (!isGameOver) {
+    int ab = 0;
+    for (int i=0; i<2; i++) {
+      BlockRunner *b = &activeBlocks[i];
+      if (b->block) {
+        if (now>=b->lastStep+b->stepInterval) {
+          if (b->block->move(0, b->movingUp ? 1 : -1, 0, b->movingUp)) {
+            b->lastStep = now;
+            makeDirty();
           }
+          else {
+            // could not move, means that we've collided with floor or existing pixels
+            makeDirty();
+            b->block->dim();
+            checkRows(b->movingUp);
+            // remove block (but pixels will remain)
+            b->block = NULL;
+            // start new one
+            if (!launchRandomBlock(b->movingUp)) {
+              // game over
+              gameOver();
+            }
+          }
+        }
+        if (b->block) {
+          ab++;
         }
       }
     }
+    if (ab==0) gameOver();
   }
-  return false; // no need to call again immediately
+  return true; // no need to call again immediately
 }
 
 
