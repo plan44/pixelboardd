@@ -181,9 +181,9 @@ TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aDirection) :
   lastTextStep(Never)
 {
   init();
-  textColor.r = 255;
-  textColor.g = 255;
-  textColor.b = 255;
+  textColor.r = 0;
+  textColor.g = 0;
+  textColor.b = 0;
   textColor.a = 255;
   text_intensity = 255; // intensity of last column of text (where text appears)
   cycles_per_px = 5;
