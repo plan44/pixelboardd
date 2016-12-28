@@ -62,39 +62,39 @@ static const ColorDef colorDefs[33] = {
   // falling top down
   {   0,   0,   0 }, // none
   { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
+  { 255, 255,   0 }, // square
+  {   0, 160, 255 }, // L
+  {   0, 255, 160 }, // L reverse
   {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
+  { 160,   0, 255 }, // squiggly
+  { 255,   0, 160 }, // squiggly reversed
   // rising bottom up
   {   0,   0,   0 }, // none
   { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
+  { 255, 255,   0 }, // square
+  {   0, 160, 255 }, // L
+  {   0, 255, 160 }, // L reverse
   {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
+  { 160,   0, 255 }, // squiggly
+  { 255,   0, 160 }, // squiggly reversed
   // DIMMED: falling top down
   {   0,   0,   0 }, // none
   { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
+  { 255, 255,   0 }, // square
+  {   0, 160, 255 }, // L
+  {   0, 255, 160 }, // L reverse
   {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
+  { 160,   0, 255 }, // squiggly
+  { 255,   0, 160 }, // squiggly reversed
   // DIMMED: rising bottom up
   {   0,   0,   0 }, // none
   { 255,   0,   0 }, // line
-  { 100, 255,   0 }, // square
-  {   0, 100, 255 }, // L
-  {   0, 255, 100 }, // L reverse
+  { 255, 255,   0 }, // square
+  {   0, 160, 255 }, // L
+  {   0, 255, 160 }, // L reverse
   {   0,   0, 255 }, // T
-  { 100,   0, 255 }, // squiggly
-  { 255,   0, 100 }, // squiggly reversed
+  { 160,   0, 255 }, // squiggly
+  { 255,   0, 160 }, // squiggly reversed
   // Row kill flash
   { 255, 255, 255 }
 };
@@ -155,7 +155,7 @@ bool Block::getPositionedPixel(int aPixelIndex, int aCenterX, int aCenterY, int 
   int dx,dy;
   if (!getPixel(aPixelIndex, dx, dy)) return false;
   switch (aOrientation) {
-    case 0: aX=aCenterX+dx; aY=aCenterY+dy; break;
+    default: aX=aCenterX+dx; aY=aCenterY+dy; break;
     case 1: aX=aCenterX+dy; aY=aCenterY-dx; break;
     case 2: aX=aCenterX-dx; aY=aCenterY-dy; break;
     case 3: aX=aCenterX-dy; aY=aCenterY+dx; break;
@@ -305,7 +305,6 @@ void BlocksPage::gameOver()
 }
 
 
-
 PixelColor BlocksPage::colorAt(int aX, int aY)
 {
   uint8_t cc = colorCodeAt(aX, aY);
@@ -315,14 +314,10 @@ PixelColor BlocksPage::colorAt(int aX, int aY)
   pix.g = cdef->g;
   pix.b = cdef->b;
   if (isGameOver) {
-    pix.r = pix.r*1/2;
-    pix.g = pix.g*1/2;
-    pix.b = pix.b*1/2;
+    pix = dimPixel(pix, 128);
   }
   else if (cc>=16 && cc<32) {
-    pix.r = pix.r*3/4;
-    pix.g = pix.g*3/4;
-    pix.b = pix.b*3/4;
+    pix = dimPixel(pix, 188);
   }
   return pix;
 }

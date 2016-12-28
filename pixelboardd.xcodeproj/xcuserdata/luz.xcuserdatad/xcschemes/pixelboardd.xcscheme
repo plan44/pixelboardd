@@ -67,11 +67,19 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--upsidedown"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--jsonapiport 8090"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--image /Volumes/OpenWRT/openwrt/feeds/plan44/pixelboard-config/files/www/images/xmas.png"
+            argument = "--image /Volumes/OpenWRT/openwrt/feeds/plan44/pixelboard-config/files/www/images/default.png"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--message &quot;You can play Tetris by touching the board&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

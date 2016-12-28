@@ -44,6 +44,7 @@ class PixelBoardD : public CmdLineApp
   typedef CmdLineApp inherited;
 
   LEDChainCommPtr display;
+  bool upsideDown;
 
   ButtonInputPtr lower_left;
   ButtonInputPtr lower_right;
@@ -74,7 +75,8 @@ class PixelBoardD : public CmdLineApp
 public:
 
   PixelBoardD() :
-    starttime(MainLoop::now())
+    starttime(MainLoop::now()),
+    upsideDown(false)
   {
   }
 
@@ -84,6 +86,7 @@ public:
       "Usage: %1$s [options]\n";
     const CmdLineOptionDescriptor options[] = {
       { 0  , "ledchain",       true,  "device;set device to send LED chain data to" },
+      { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
       { 0  , "jsonapiport",    true,  "port;server port number for JSON API (default=none)" },
@@ -91,6 +94,7 @@ public:
       { 0  , "defaultpage",    true,  "display page;default page to show after start and after other page ends" },
       { 0  , "twosided",       false, "defines if default page should run two-sided" },
       { 0  , "image",          true,  "filename;image to show by default on display page" },
+      { 0  , "message",        true,  "message;text to show from time to time on display page" },
       { 'l', "loglevel",       true,  "level;set max level of log message detail to show on stdout" },
       { 0  , "errlevel",       true,  "level;set max level for log messages to go to stderr as well" },
       { 0  , "dontlogerrors",  false, "don't duplicate error messages (see --errlevel) on stdout" },
@@ -118,9 +122,10 @@ public:
       SETERRLEVEL(errlevel, !getOption("dontlogerrors"));
 
       // create the LED chain
+      upsideDown = getOption("upsidedown");
       string leddev = "/tmp/ledchainsim";
       getStringOption("ledchain", leddev);
-      display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 20, false, true, true));
+      display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 20, upsideDown, true, true, upsideDown));
 
       // - start API server and wait for things to happen
       string apiport;
@@ -137,9 +142,12 @@ public:
       // add pages
       // - display
       displayPage = DisplayPagePtr(new DisplayPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
-      string img;
-      if (getStringOption("image", img)) {
-        displayPage->loadPNGBackground(img);
+      string s;
+      if (getStringOption("image", s)) {
+        displayPage->loadPNGBackground(s);
+      }
+      if (getStringOption("message", s)) {
+        displayPage->setDefaultMessage(s);
       }
       // - blocks
       blocksPage = BlocksPagePtr(new BlocksPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
@@ -404,10 +412,11 @@ public:
         triggers = newState & ~touchState[side];
         LOG(triggers ? LOG_INFO : LOG_DEBUG, "checkInputs: side=%d, touchState=0x%02X, newState=0x%02X, triggers=0x%02X", side, touchState[side], newState, triggers);
         touchState[side] = newState;
-        if (triggers & 0x02) keyHandler(side, 0); // left
-        else if (triggers & 0x10) keyHandler(side, 1); // right
-        else if (triggers & 0x04) keyHandler(side, 2); // turn
-        else if (triggers & 0x04) keyHandler(side, 3); // drop
+        int reportedside = upsideDown ? 1-side : side; // report sides reversed when board is (physically) used upside down.
+        if (triggers & 0x02) keyHandler(reportedside, 0); // left
+        else if (triggers & 0x10) keyHandler(reportedside, 3); // right
+        else if (triggers & 0x04) keyHandler(reportedside, 1); // turn
+        else if (triggers & 0x08) keyHandler(reportedside, 2); // drop
       }
       updateDisplay();
     }

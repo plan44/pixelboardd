@@ -29,6 +29,7 @@ pixelboardd_CXXFLAGS = \
   -I ${srcdir}/src \
   -I ${srcdir}/src/Blocks \
   -I ${srcdir}/src/Display \
+  -I ${srcdir}/src/Torch \
   -D DISABLE_I2C=0 \
   -D DISABLE_SPI=0 \
   ${BOOST_CPPFLAGS} \
@@ -116,6 +117,10 @@ pixelboardd_SOURCES = \
   src/Blocks/blocks.hpp \
   src/Display/display.cpp \
   src/Display/display.hpp \
+  src/Torch/torch.cpp \
+  src/Torch/torch.hpp \
+  src/textview.cpp \
+  src/textview.hpp \
   src/pixelpage.cpp \
   src/pixelpage.hpp \
   src/pixelboardd_main.cpp
