@@ -129,6 +129,12 @@ namespace p44 {
 
   class BlocksPage : public PixelPage
   {
+    enum {
+      game_ready,
+      game_running,
+      game_over
+    } gameState;
+
     typedef PixelPage inherited;
     friend class Block;
 
@@ -137,27 +143,27 @@ namespace p44 {
     BlockRunner activeBlocks[2]; ///< the max 2 active blocks (top and bottom)
     int score[2]; ///< the score for the players
 
-    bool isGameOver; ///< set when game is over
-    MLMicroSeconds gameOverAt;
-
+    bool defaultTwoSided;
     long rowKillTicket;
+    long stateChangeTicket;
+
+    uint8_t ledState[2];
 
   public :
 
     MLMicroSeconds stepInterval;
     MLMicroSeconds dropStepInterval;
     MLMicroSeconds rowKillDelay;
-    MLMicroSeconds gameOverPause;
 
 
     BlocksPage(PixelPageInfoCB aInfoCallback);
 
-    /// (re)start
-    /// @param aTwoSided if set, pieces fall from both sides
-    virtual void start(bool aTwoSided) P44_OVERRIDE;
+    /// show
+    /// @param aTwoSided if set, default game is two-sided
+    virtual void show(bool aTwoSided) P44_OVERRIDE;
 
-    /// stop
-    virtual void stop() P44_OVERRIDE;
+    /// hide
+    virtual void hide() P44_OVERRIDE;
 
     /// calculate changes on the display, return true if any
     /// @return true if complete, false if step() would like to be called immediately again
@@ -167,7 +173,13 @@ namespace p44 {
     /// handle key events
     /// @param aSide which side of the board (0=bottom, 1=top)
     /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
-    virtual void handleKey(int aSide, int aKeyNum) P44_OVERRIDE;
+    /// @return true if fully handled, false if next page should handle it as well
+    virtual bool handleKey(int aSide, int aKeyNum) P44_OVERRIDE;
+
+    /// get key LED status
+    /// @param aSide which side of the board (0=bottom, 1=top)
+    /// @return bits 0..3 correspond to LEDs for key 0..3
+    virtual uint8_t keyLedState(int aSide) P44_OVERRIDE;
 
     /// get color at X,Y
     /// @param aX PlayField X coordinate
@@ -211,6 +223,9 @@ namespace p44 {
   private:
 
     void clear();
+    void stop();
+    void makeReady(bool aWithAutostart);
+    void startGame(bool aTwoSided);
     void gameOver();
     void removeRow(int aY, bool aBlockFromBottom);
     void checkRows(bool aBlockFromBottom);

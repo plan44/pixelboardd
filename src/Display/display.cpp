@@ -33,18 +33,18 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
   lastMessageShow(Never)
 {
   clear();
-  message = TextViewPtr(new TextView(2, 19, 20, 3));
-  message->setText("Hello World");
+  message = TextViewPtr(new TextView(7, 0, 20, 1));
 }
 
 
-void DisplayPage::start(bool aTwoSided)
+void DisplayPage::show(bool aTwoSided)
 {
   makeDirty();
+  showMessage(defaultMessage);
 }
 
 
-void DisplayPage::stop()
+void DisplayPage::hide()
 {
 
 }
@@ -113,6 +113,24 @@ bool DisplayPage::handleRequest(JsonObjectPtr aRequest, RequestDoneCB aRequestDo
     if (aRequestDoneCB) aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
     return true;
   }
+  else if (aRequest->get("textcolor", o)) {
+    // webcolor
+    string webcolor = o->stringValue();
+    uint32_t col;
+    if (sscanf(webcolor.c_str(),"%x",&col)==1) {
+      PixelColor p;
+      if (webcolor.size()<7)
+        p.a = 0xFF;
+      else
+        p.a = (col>>24) & 0xFF;
+      p.r = (col>>16) & 0xFF;
+      p.g = (col>>8) & 0xFF;
+      p.b = col & 0xFF;
+      message->setTextColor(p);
+    }
+    if (aRequestDoneCB) aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
+    return true;
+  }
   return false; // page does not handle the request
 }
 
@@ -130,6 +148,11 @@ void DisplayPage::setDefaultMessage(const string aMessage)
 }
 
 
+bool DisplayPage::handleKey(int aSide, int aKeyNum)
+{
+  inherited::handleKey(aSide, aKeyNum);
+  return false; // let next page handle the keys again
+}
 
 
 ErrorPtr DisplayPage::loadPNGBackground(const string aPNGFileName)

@@ -109,10 +109,11 @@ bool PixelPage::step()
 }
 
 
-void PixelPage::handleKey(int aSide, int aKeyNum)
+bool PixelPage::handleKey(int aSide, int aKeyNum)
 {
   // by default, any key quits current page
   postInfo("quit");
+  return true; // and that's all
 }
 
 

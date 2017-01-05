@@ -72,10 +72,10 @@ namespace p44 {
 
     /// start showing this page
     /// @param aTwoSided expect two-sided usage of the page
-    virtual void start(bool aTwoSided) = 0;
+    virtual void show(bool aTwoSided) = 0;
 
-    /// stop showing this page
-    virtual void stop() = 0;
+    /// hide this page
+    virtual void hide() = 0;
 
     /// calculate changes on the display, return true if any
     /// @return true if complete, false if step() would like to be called immediately again
@@ -85,7 +85,13 @@ namespace p44 {
     /// handle key events
     /// @param aSide which side of the board (0=bottom, 1=top)
     /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
-    virtual void handleKey(int aSide, int aKeyNum);
+    /// @return true if fully handled, false if next page should handle it as well
+    virtual bool handleKey(int aSide, int aKeyNum);
+
+    /// get key LED status
+    /// @param aSide which side of the board (0=bottom, 1=top)
+    /// @return bits 0..3 correspond to LEDs for key 0..3
+    virtual uint8_t keyLedState(int aSide) { return 0; }
 
     /// handle API requests
     /// @param aRequest JSON request

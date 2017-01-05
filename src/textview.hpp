@@ -81,6 +81,10 @@ namespace p44 {
     /// set new text
     void setText(const string aText);
 
+    /// set new text color
+    void setTextColor(PixelColor aPixelColor) { textColor = aPixelColor; };
+
+
   protected:
 
     void init();

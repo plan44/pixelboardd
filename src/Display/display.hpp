@@ -50,10 +50,10 @@ namespace p44 {
 
     /// start showing this page
     /// @param aTwoSided expect two-sided usage of the page
-    virtual void start(bool aTwoSided) P44_OVERRIDE;
+    virtual void show(bool aTwoSided) P44_OVERRIDE;
 
-    /// stop showing this page
-    virtual void stop() P44_OVERRIDE;
+    /// hide this page
+    virtual void hide() P44_OVERRIDE;
 
     /// calculate changes on the display, return true if any
     /// @return true if complete, false if step() would like to be called immediately again
@@ -76,11 +76,17 @@ namespace p44 {
     /// set default message
     void setDefaultMessage(const string aMessage);
 
+    /// handle key events
+    /// @param aSide which side of the board (0=bottom, 1=top)
+    /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
+    /// @return true if fully handled, false if next page should handle it as well
+    virtual bool handleKey(int aSide, int aKeyNum) P44_OVERRIDE;
+
     /// handle API requests
     /// @param aRequest JSON request
     /// @param aRequestDoneCB must be called when the request has been executed, possibly passing back error or answer
     /// @return true if request will be handled by this page, false otherwise (other pages will be asked)
-    virtual bool handleRequest(JsonObjectPtr aRequest, RequestDoneCB aRequestDoneCB);
+    virtual bool handleRequest(JsonObjectPtr aRequest, RequestDoneCB aRequestDoneCB) P44_OVERRIDE;
 
   private:
 

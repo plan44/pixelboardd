@@ -254,9 +254,16 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   stepInterval(0.7*Second),
   dropStepInterval(0.05*Second),
   rowKillDelay(0.15*Second),
-  gameOverPause(5*Second),
-  isGameOver(false),
-  gameOverAt(Never)
+  defaultTwoSided(false),
+  gameState(game_ready),
+  rowKillTicket(0),
+  stateChangeTicket(0)
+{
+  stop();
+}
+
+
+void BlocksPage::hide()
 {
   stop();
 }
@@ -268,39 +275,74 @@ void BlocksPage::clear()
   for (int i=0; i<PAGE_NUMPIXELS; ++i) {
     colorCodes[i] = 0;
   }
-}
-
-
-void BlocksPage::start(bool aTwoSided)
-{
-  stop();
-  clear();
-  isGameOver = false;
-  launchRandomBlock(false);
-  if (aTwoSided) {
-    launchRandomBlock(true);
-  }
+  makeDirty();
 }
 
 
 void BlocksPage::stop()
 {
   MainLoop::currentMainLoop().cancelExecutionTicket(rowKillTicket);
+  MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
   // remove block if any is still running
   for (int bi=0; bi<2; bi++) {
     // clear runners
     BlockRunner *b = &activeBlocks[bi];
     if (b->block) b->block->dim(); // dim it, no longer live
     b->block = NULL; // forget it
+    ledState[bi] = 0; // LEDs off
   }
 }
 
 
 
+void BlocksPage::show(bool aTwoSided)
+{
+  defaultTwoSided = aTwoSided;
+  // make ready
+  makeReady(true);
+}
+
+
+void BlocksPage::makeReady(bool aWithAutostart)
+{
+  gameState = game_ready;
+  // show start keys
+  ledState[0] = 0x06; // Turn and Drop on
+  ledState[1] = 0x06; // Turn and Drop on
+  if (aWithAutostart) {
+    // auto-start default game in 15 secs
+    MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startGame, this, defaultTwoSided), 15*Second);
+  }
+  else {
+    // quit after a while
+    MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::postInfo, this, "quit"), 42*Second);
+  }
+  makeDirty();
+}
+
+
+void BlocksPage::startGame(bool aTwoSided)
+{
+  MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
+  stop();
+  clear();
+  gameState = game_running;
+  launchRandomBlock(false);
+  ledState[0] = 0x0F; // all 4 keys on
+  ledState[1] = 0; // default to single player
+  if (aTwoSided) {
+    launchRandomBlock(true);
+    ledState[1] = 0x0F; // all 4 keys on for second player
+  }
+}
+
+
 void BlocksPage::gameOver()
 {
-  isGameOver = true;
-  gameOverAt = MainLoop::now();
+  gameState = game_over;
+  MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
+  ledState[0] = 0; // LEDs off
+  ledState[1] = 0; // LEDs off
   makeDirty();
 }
 
@@ -313,7 +355,7 @@ PixelColor BlocksPage::colorAt(int aX, int aY)
   pix.r = cdef->r;
   pix.g = cdef->g;
   pix.b = cdef->b;
-  if (isGameOver) {
+  if (gameState!=game_running) {
     pix = dimPixel(pix, 128);
   }
   else if (cc>=16 && cc<32) {
@@ -346,18 +388,24 @@ void BlocksPage::setColorCodeAt(ColorCode aColorCode, int aX, int aY)
 }
 
 
-void BlocksPage::handleKey(int aSide, int aKeyNum)
+uint8_t BlocksPage::keyLedState(int aSide)
 {
-  if (isGameOver && MainLoop::now()>gameOverAt+gameOverPause) {
+  return ledState[aSide];
+}
+
+
+bool BlocksPage::handleKey(int aSide, int aKeyNum)
+{
+  if (gameState==game_ready) {
     // left or right restarts, drop exits
     if (aKeyNum==2) {
       postInfo("quit");
     }
-    else {
-      start(aSide==1);
+    else if (aKeyNum==1) {
+      startGame(aSide==1);
     }
   }
-  else {
+  else if (gameState==game_running) {
     int movement = 0;
     int rotation = 0;
     bool drop = false;
@@ -376,6 +424,7 @@ void BlocksPage::handleKey(int aSide, int aKeyNum)
       dropBlock(aSide==1);
     }
   }
+  return true; // fully handled
 }
 
 
@@ -482,7 +531,7 @@ void BlocksPage::checkRows(bool aBlockFromBottom)
 bool BlocksPage::step()
 {
   MLMicroSeconds now = MainLoop::now();
-  if (!isGameOver) {
+  if (gameState==game_running) {
     int ab = 0;
     for (int i=0; i<2; i++) {
       BlockRunner *b = &activeBlocks[i];

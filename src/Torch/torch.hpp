@@ -39,10 +39,10 @@ namespace p44 {
 
     /// start showing this page
     /// @param aTwoSided expect two-sided usage of the page
-    virtual void start(bool aTwoSided) P44_OVERRIDE;
+    virtual void show(bool aTwoSided) P44_OVERRIDE;
 
     /// stop showing this page
-    virtual void stop() P44_OVERRIDE;
+    virtual void hide() P44_OVERRIDE;
 
     /// stop to next
     virtual bool step() P44_OVERRIDE;

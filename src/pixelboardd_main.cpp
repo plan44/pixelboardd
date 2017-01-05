@@ -52,6 +52,7 @@ class PixelBoardD : public CmdLineApp
   ButtonInputPtr lower_drop;
 
   I2CDevicePtr touchDev;
+  I2CDevicePtr keyLedDev;
   DigitalIoPtr touchSel;
   DigitalIoPtr touchDetect;
   uint8_t touchState[2];
@@ -167,6 +168,7 @@ public:
 
       // create the touch pad controls
       if (!getOption("notouch")) {
+        // prepare access to the touch chip
         touchDev = I2CManager::sharedManager().getDevice(0, "generic@1B");
         touchSel = DigitalIoPtr(new DigitalIo("gpio.7", true, false));
         touchDetect = DigitalIoPtr(new DigitalIo("/gpio.15", false, false));
@@ -176,6 +178,8 @@ public:
         LOG(LOG_NOTICE,"Device ID = 0x%02X, keystatus = 0x%02X", id, sta);
         touchState[0] = 0;
         touchState[1] = 0;
+        // prepare access to the key LEDs
+        keyLedDev = I2CManager::sharedManager().getDevice(0, "generic@20");
       }
 
     } // if !terminated
@@ -188,13 +192,13 @@ public:
   {
     PagesMap::iterator pos = pages.find(aPageName);
     if (pos!=pages.end()) {
-      // stop current page
+      // hide current page
       if (currentPage) {
-        currentPage->stop();
+        currentPage->hide();
       }
       // start new one
       currentPage = pos->second;
-      currentPage->start(aTwoSided);
+      currentPage->show(aTwoSided);
     }
     updateDisplay();
   }
@@ -400,6 +404,13 @@ public:
   }
 
 
+  void setLeds(int aSide, uint8_t aLedMask)
+  {
+    touchSel->set(aSide==1); // select side
+    keyLedDev->getBus().SMBusReadByte(keyLedDev.get(), 0x14, aLedMask);
+  }
+
+
   void checkInputs()
   {
     if (touchDev) {
@@ -417,6 +428,10 @@ public:
         else if (triggers & 0x10) keyHandler(reportedside, 3); // right
         else if (triggers & 0x04) keyHandler(reportedside, 1); // turn
         else if (triggers & 0x08) keyHandler(reportedside, 2); // drop
+        // update LEDs
+        uint8_t leds = currentPage ? currentPage->keyLedState(reportedside) : 0;
+        uint8_t ledmask = 0x1E & (~(leds<<1) & 0x1E);
+        keyLedDev->getBus().SMBusWriteByte(keyLedDev.get(), 0x14, ledmask);
       }
       updateDisplay();
     }
@@ -456,7 +471,11 @@ public:
   void keyHandler(int aSide, int aKeyNum)
   {
     if (currentPage) {
-      currentPage->handleKey(aSide, aKeyNum);
+      bool handled = currentPage->handleKey(aSide, aKeyNum);
+      if (!handled && currentPage) {
+        // probably another page is now active, let it handle the key as well
+        currentPage->handleKey(aSide, aKeyNum);
+      }
     }
     updateDisplay();
   }
