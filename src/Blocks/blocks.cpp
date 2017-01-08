@@ -441,17 +441,19 @@ bool BlocksPage::launchBlock(BlockType aBlockType, int aColumn, int aOrientation
   // position it
   int minx,maxx,miny,maxy;
   b->block->getExtents(aBottom ? (aOrientation+2) % 4 : aOrientation, minx, maxx, miny, maxy);
+  LOG(LOG_DEBUG, "launchblock: blocktype=%d, orientation=%d, extents: minx=%d, maxx=%d, miny=%d, maxy=%d", aBlockType, aOrientation, minx, maxx, miny, maxy);
   // make sure it is within horizontal bounds
   if (aColumn+minx<0) aColumn = -minx;
   else if (aColumn+maxx>=PAGE_NUMCOLS) aColumn = PAGE_NUMCOLS-1-maxx;
   // position vertically with first pixel just visible
   int row;
   if (!aBottom) {
-    row = PAGE_NUMROWS-1+miny;
+    row = PAGE_NUMROWS-1-miny;
   }
   else {
     row = -maxy;
   }
+  LOG(LOG_DEBUG, "- positioning at row %d", row);
   if (!b->block->position(aColumn, row, aOrientation, aBottom)) {
     // cannot launch a block any more
     b->block = NULL;
