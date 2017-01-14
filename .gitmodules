@@ -1,4 +1,4 @@
 [submodule "pixelboardd/src/p44utils"]
 	path = src/p44utils
 	url = ../p44utils.git
-	branch = luz
+	branch = master
