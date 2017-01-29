@@ -39,6 +39,7 @@ namespace p44 {
     int direction;
 
     // text parameters
+    bool scrolling; // set if text should scroll
     int text_intensity; // intensity of last column of text (where text appears)
     int cycles_per_px;
     int text_repeats; // text displays until faded down to almost zero
@@ -79,7 +80,7 @@ namespace p44 {
     virtual PixelColor colorAt(int aX, int aY);
 
     /// set new text
-    void setText(const string aText);
+    void setText(const string aText, bool aScrolling = true);
 
     /// set new text color
     void setTextColor(PixelColor aPixelColor) { textColor = aPixelColor; };

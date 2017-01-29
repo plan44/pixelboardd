@@ -226,7 +226,7 @@ static inline int glyphIndexForChar(const char aChar)
 }
 
 
-void TextView::setText(const string aText)
+void TextView::setText(const string aText, bool aScrolling)
 {
   // URL decode
   text = "";
@@ -260,9 +260,17 @@ void TextView::setText(const string aText)
     i++;
   }
   // initiate display of new text
-  textPixelOffset = -width;
+  scrolling = aScrolling;
   textCycleCount = 0;
   repeatCount = 0;
+  if (scrolling) {
+    // let it scroll in from the right
+    textPixelOffset = -width;
+  }
+  else {
+    // just appears at origin
+    textPixelOffset = 0;
+  }
 }
 
 
@@ -276,7 +284,13 @@ bool TextView::step()
     // fade between rows
     uint8_t maxBright = text_intensity-repeatCount*fade_per_repeat;
     uint8_t thisBright, nextBright;
-    crossFade(255*textCycleCount/cycles_per_px, maxBright, thisBright, nextBright);
+    if (scrolling) {
+      crossFade(255*textCycleCount/cycles_per_px, maxBright, thisBright, nextBright);
+    }
+    else {
+      thisBright = maxBright;
+      nextBright = 0;
+    }
     // generate vertical rows
     int activeCols = width;
     // calculate text length in pixels
@@ -343,20 +357,31 @@ bool TextView::step()
     }
     // increment
     textCycleCount++;
-    if (textCycleCount>=cycles_per_px) {
-      textCycleCount = 0;
-      textPixelOffset++;
-      if (textPixelOffset>totalTextPixels) {
-        // text shown, check for repeats
+    if (scrolling) {
+      if (textCycleCount>=cycles_per_px) {
+        textCycleCount = 0;
+        textPixelOffset++;
+        if (textPixelOffset>totalTextPixels) {
+          // text shown, check for repeats
+          repeatCount++;
+          if (text_repeats!=0 && repeatCount>=text_repeats) {
+            // done
+            text = ""; // remove text
+          }
+          else {
+            // show again
+            textPixelOffset = -width;
+            textCycleCount = 0;
+          }
+        }
+      }
+    }
+    else {
+      if (textCycleCount>=cycles_per_px*width) {
         repeatCount++;
         if (text_repeats!=0 && repeatCount>=text_repeats) {
           // done
           text = ""; // remove text
-        }
-        else {
-          // show again
-          textPixelOffset = -width;
-          textCycleCount = 0;
         }
       }
     }
