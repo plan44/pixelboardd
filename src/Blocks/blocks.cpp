@@ -260,6 +260,8 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   stateChangeTicket(0)
 {
   stop();
+  scoretext = TextViewPtr(new TextView(7, 0, 20, 1));
+  scoretext->setTextColor({255, 128, 0, 255});
 }
 
 
@@ -326,6 +328,9 @@ void BlocksPage::startGame(bool aTwoSided)
   MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
   stop();
   clear();
+  level = 0;
+  score[0] = 0;
+  score[1] = 0;
   gameState = game_running;
   launchRandomBlock(false);
   ledState[0] = 0x0F; // all 4 keys on
@@ -343,6 +348,7 @@ void BlocksPage::gameOver()
   MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
   ledState[0] = 0; // LEDs off
   ledState[1] = 0; // LEDs off
+  scoretext->setText(string_format("%d", score[0]+score[1]), true);
   makeDirty();
 }
 
@@ -357,6 +363,9 @@ PixelColor BlocksPage::colorAt(int aX, int aY)
   pix.b = cdef->b;
   if (gameState!=game_running) {
     pix = dimPixel(pix, 128);
+    // overlay text
+    PixelColor ovl = scoretext->colorAt(aX, aY);
+    overlayPixel(pix, ovl);
   }
   else if (cc>=16 && cc<32) {
     pix = dimPixel(pix, 188);
@@ -438,6 +447,8 @@ bool BlocksPage::launchBlock(BlockType aBlockType, int aColumn, int aOrientation
   b->block = BlockPtr(new Block(*this, aBlockType, (aBottom ? 8 : 0)+blockDefs[aBlockType].color));
   b->movingUp = aBottom;
   b->stepInterval = stepInterval;
+  b->dropping = false;
+  b->droppedsteps = 0;
   // position it
   int minx,maxx,miny,maxy;
   b->block->getExtents(aBottom ? (aOrientation+2) % 4 : aOrientation, minx, maxx, miny, maxy);
@@ -477,7 +488,7 @@ bool BlocksPage::launchRandomBlock(bool aBottom)
 
 
 
-void BlocksPage::removeRow(int aY, bool aBlockFromBottom)
+void BlocksPage::removeRow(int aY, bool aBlockFromBottom, int aRemovedRows)
 {
   // unshow running blocks
   for (int i=0; i<2; i++) {
@@ -496,13 +507,15 @@ void BlocksPage::removeRow(int aY, bool aBlockFromBottom)
     BlockRunner *b = &activeBlocks[i];
     if (b->block) b->block->show();
   }
-  // ccontinue checking
-  rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom), rowKillDelay);
+  // count
+  aRemovedRows++;
+  // continue checking
+  rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom, aRemovedRows), rowKillDelay);
   makeDirty();
 }
 
 
-void BlocksPage::checkRows(bool aBlockFromBottom)
+void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
 {
   // check from top to bottom relative to falling block
   int dir = aBlockFromBottom ? -1 : 1;
@@ -522,9 +535,27 @@ void BlocksPage::checkRows(bool aBlockFromBottom)
         setColorCodeAt(32, x, y); // row flash
       }
       makeDirty();
-      rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom), rowKillDelay);
-      break;
+      rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom, aRemovedRows), rowKillDelay);
+      return;
     }
+  }
+  // no more full rows found -> count score now
+  if (aRemovedRows>0) {
+    // - row removal scoring:
+    //   - one row:      40*(level+1)
+    //   - two rows:    100*(level+1)
+    //   - three rows:  300*(level+1)
+    //   - four rows:  1200*(level+1)
+    int s=0;
+    switch (aRemovedRows) {
+      case 1 : s = 40; break;
+      case 2 : s = 100; break;
+      case 3 : s = 300; break;
+      case 4 : s = 1200; break;
+    }
+    s = s *(level+1);
+    LOG(LOG_INFO,"Scoring: %d rows removed in level %d -> %d points", aRemovedRows, level, s);
+    score[aBlockFromBottom ? 1 : 0] += s;
   }
 }
 
@@ -540,14 +571,22 @@ bool BlocksPage::step()
       if (b->block) {
         if (now>=b->lastStep+b->stepInterval) {
           if (b->block->move(0, b->movingUp ? 1 : -1, 0, b->movingUp)) {
+            // block could move
             b->lastStep = now;
+            if (b->dropping) b->droppedsteps++; // count dropped steps
             makeDirty();
           }
           else {
             // could not move, means that we've collided with floor or existing pixels
             makeDirty();
             b->block->dim();
-            checkRows(b->movingUp);
+            // count dropping score
+            if (b->dropping) {
+              LOG(LOG_INFO, "Scoring: dropped %d steps -> %d points", b->droppedsteps, b->droppedsteps);
+              score[b->movingUp ? 1 : 0] += b->droppedsteps;
+            }
+            // check rows
+            checkRows(b->movingUp, 0);
             // remove block (but pixels will remain)
             b->block = NULL;
             // start new one
@@ -564,6 +603,8 @@ bool BlocksPage::step()
     }
     if (ab==0) gameOver();
   }
+  scoretext->step();
+  if (scoretext->isDirty()) makeDirty();
   return true; // no need to call again immediately
 }
 
@@ -584,6 +625,8 @@ void BlocksPage::dropBlock(bool aLower)
   BlockRunner *b = &activeBlocks[aLower ? 1 : 0];
   if (b->block) {
     b->stepInterval = dropStepInterval;
+    b->dropping = true;
+    b->droppedsteps = 0;
   }
 }
 

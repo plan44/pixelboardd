@@ -23,6 +23,7 @@
 #define __pixelboardd_blocks_hpp__
 
 #include "pixelpage.hpp"
+#include "textview.hpp"
 
 
 namespace p44 {
@@ -124,6 +125,8 @@ namespace p44 {
     MLMicroSeconds lastStep;
     MLMicroSeconds stepInterval;
     bool movingUp;
+    bool dropping; ///< set when block starts dropping
+    int droppedsteps; ///< how many steps block has dropped so far
   };
 
 
@@ -142,12 +145,15 @@ namespace p44 {
 
     BlockRunner activeBlocks[2]; ///< the max 2 active blocks (top and bottom)
     int score[2]; ///< the score for the players
+    int level; ///< the level
 
     bool defaultTwoSided;
     long rowKillTicket;
     long stateChangeTicket;
 
     uint8_t ledState[2];
+
+    TextViewPtr scoretext;
 
   public :
 
@@ -227,8 +233,8 @@ namespace p44 {
     void makeReady(bool aWithAutostart);
     void startGame(bool aTwoSided);
     void gameOver();
-    void removeRow(int aY, bool aBlockFromBottom);
-    void checkRows(bool aBlockFromBottom);
+    void removeRow(int aY, bool aBlockFromBottom, int aRemovedRows);
+    void checkRows(bool aBlockFromBottom, int aRemovedRows);
 
 
   };
