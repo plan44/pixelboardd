@@ -86,7 +86,7 @@ public:
     const char *usageText =
       "Usage: %1$s [options]\n";
     const CmdLineOptionDescriptor options[] = {
-      { 0  , "ledchain",       true,  "device;set device to send LED chain data to" },
+      { 'd', "ledchain",       true,  "device;set device to send LED chain data to" },
       { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
