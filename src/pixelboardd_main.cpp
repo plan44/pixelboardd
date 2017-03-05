@@ -191,7 +191,7 @@ public:
         touchState[0] = 0;
         touchState[1] = 0;
         // prepare access to the key LEDs
-        keyLedDev = I2CManager::sharedManager().getDevice(0, "generic@20");
+        keyLedDev = I2CManager::sharedManager().getDevice(i2cbus, "generic@20");
       }
 
     } // if !terminated
