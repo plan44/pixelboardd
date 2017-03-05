@@ -87,6 +87,9 @@ public:
       "Usage: %1$s [options]\n";
     const CmdLineOptionDescriptor options[] = {
       { 'd', "ledchain",       true,  "device;set device to send LED chain data to" },
+      { 0  , "touchsel",       true,  "pinspec;touchboard selection signal" },
+      { 0  , "touchdetect",    true,  "pinspec;touchboard touch detect signal" },
+      { 0  , "touchreset",     true,  "pinspec;touchboard reset signal" },
       { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
@@ -168,10 +171,16 @@ public:
 
       // create the touch pad controls
       if (!getOption("notouch")) {
+        string touchselname = "gpio.0";
+        string touchdetectname = "/gpio.15";
+        string touchresetname = "gpio.6";
+        getStringOption("touchsel", touchselname);
+        getStringOption("touchdetect", touchdetectname);
+        getStringOption("touchreset", touchresetname);
         // prepare access to the touch chip
         touchDev = I2CManager::sharedManager().getDevice(0, "generic@1B");
-        touchSel = DigitalIoPtr(new DigitalIo("gpio.7", true, false));
-        touchDetect = DigitalIoPtr(new DigitalIo("/gpio.15", false, false));
+        touchSel = DigitalIoPtr(new DigitalIo(touchselname.c_str(), true, false));
+        touchDetect = DigitalIoPtr(new DigitalIo(touchdetectname.c_str(), false, false));
         uint8_t id, sta;
         touchDev->getBus().SMBusReadByte(touchDev.get(), 0, id);
         touchDev->getBus().SMBusReadByte(touchDev.get(), 0, sta);
