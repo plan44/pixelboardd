@@ -90,6 +90,7 @@ public:
       { 0  , "touchsel",       true,  "pinspec;touchboard selection signal" },
       { 0  , "touchdetect",    true,  "pinspec;touchboard touch detect signal" },
       { 0  , "touchreset",     true,  "pinspec;touchboard reset signal" },
+      { 0  , "i2cbusno",       true,  "busno;i2c bus to use" },
       { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
@@ -177,8 +178,10 @@ public:
         getStringOption("touchsel", touchselname);
         getStringOption("touchdetect", touchdetectname);
         getStringOption("touchreset", touchresetname);
+        int i2cbus = 0;
+        getIntOption("i2cbusno", i2cbus);
         // prepare access to the touch chip
-        touchDev = I2CManager::sharedManager().getDevice(0, "generic@1B");
+        touchDev = I2CManager::sharedManager().getDevice(i2cbus, "generic@1B");
         touchSel = DigitalIoPtr(new DigitalIo(touchselname.c_str(), true, false));
         touchDetect = DigitalIoPtr(new DigitalIo(touchdetectname.c_str(), false, false));
         uint8_t id, sta;
