@@ -256,6 +256,7 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   rowKillDelay(0.15*Second),
   defaultTwoSided(false),
   gameState(game_ready),
+  playModeAccumulator(0),
   rowKillTicket(0),
   stateChangeTicket(0)
 {
@@ -308,12 +309,13 @@ void BlocksPage::show(bool aTwoSided)
 void BlocksPage::makeReady(bool aWithAutostart)
 {
   gameState = game_ready;
+  playModeAccumulator = 0;
   // show start keys
   ledState[0] = 0x06; // Turn and Drop on
   ledState[1] = 0x06; // Turn and Drop on
   if (aWithAutostart) {
     // auto-start default game in 15 secs
-    MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startGame, this, defaultTwoSided), 15*Second);
+    MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startGame, this, defaultTwoSided ? 0x03 : 0x01), 15*Second);
   }
   else {
     // quit after a while
@@ -323,7 +325,7 @@ void BlocksPage::makeReady(bool aWithAutostart)
 }
 
 
-void BlocksPage::startGame(bool aTwoSided)
+void BlocksPage::startGame(int aMode)
 {
   MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
   stop();
@@ -331,13 +333,18 @@ void BlocksPage::startGame(bool aTwoSided)
   level = 0;
   score[0] = 0;
   score[1] = 0;
+  ledState[0] = 0;
+  ledState[1] = 0;
   gameState = game_running;
-  launchRandomBlock(false);
-  ledState[0] = 0x0F; // all 4 keys on
-  ledState[1] = 0; // default to single player
-  if (aTwoSided) {
+  if (aMode & 0x01) {
+    // normal side
+    launchRandomBlock(false);
+    ledState[0] = 0x0F; // all 4 keys on
+  }
+  if (aMode & 0x02) {
+    // other side
     launchRandomBlock(true);
-    ledState[1] = 0x0F; // all 4 keys on for second player
+    ledState[1] = 0x0F; // all 4 keys on
   }
 }
 
@@ -411,7 +418,11 @@ bool BlocksPage::handleKey(int aSide, int aKeyNum)
       postInfo("quit");
     }
     else if (aKeyNum==1) {
-      startGame(aSide==1);
+      // add to acculumator
+      playModeAccumulator |= aSide==1 ? 0x02 : 0x01;
+      ledState[aSide==1 ? 0 : 1] = 0x0F; // immediate feedback: all 4 keys on
+      // but start with a little delay so other player can also join
+      MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 2*Second);
     }
   }
   else if (gameState==game_running) {
@@ -435,6 +446,13 @@ bool BlocksPage::handleKey(int aSide, int aKeyNum)
   }
   return true; // fully handled
 }
+
+
+void BlocksPage::startAccTimeout()
+{
+  startGame(playModeAccumulator);
+}
+
 
 
 

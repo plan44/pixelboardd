@@ -153,6 +153,8 @@ namespace p44 {
 
     uint8_t ledState[2];
 
+    uint8_t playModeAccumulator;
+
     TextViewPtr scoretext;
 
   public :
@@ -231,7 +233,8 @@ namespace p44 {
     void clear();
     void stop();
     void makeReady(bool aWithAutostart);
-    void startGame(bool aTwoSided);
+    void startAccTimeout();
+    void startGame(int aMode); // 0x01=single player normal, 0x02=single player reversed, 0x03=dual player
     void gameOver();
     void removeRow(int aY, bool aBlockFromBottom, int aRemovedRows);
     void checkRows(bool aBlockFromBottom, int aRemovedRows);
