@@ -37,7 +37,7 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
 }
 
 
-void DisplayPage::show(bool aTwoSided)
+void DisplayPage::show(PageMode aMode)
 {
   makeDirty();
   showMessage(defaultMessage);

@@ -49,8 +49,8 @@ namespace p44 {
     DisplayPage(PixelPageInfoCB aInfoCallback);
 
     /// start showing this page
-    /// @param aTwoSided expect two-sided usage of the page
-    virtual void show(bool aTwoSided) P44_OVERRIDE;
+    /// @param aMode in what mode to show the page (0x01=bottom, 0x02=top, 0x03=both)
+    virtual void show(PageMode aMode) P44_OVERRIDE;
 
     /// hide this page
     virtual void hide() P44_OVERRIDE;

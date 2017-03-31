@@ -254,7 +254,7 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   stepInterval(0.7*Second),
   dropStepInterval(0.05*Second),
   rowKillDelay(0.15*Second),
-  defaultTwoSided(false),
+  defaultMode(0x01),
   gameState(game_ready),
   playModeAccumulator(0),
   rowKillTicket(0),
@@ -298,9 +298,9 @@ void BlocksPage::stop()
 
 
 
-void BlocksPage::show(bool aTwoSided)
+void BlocksPage::show(PageMode aMode)
 {
-  defaultTwoSided = aTwoSided;
+  defaultMode = aMode;
   // make ready
   makeReady(true);
 }
@@ -315,7 +315,11 @@ void BlocksPage::makeReady(bool aWithAutostart)
   ledState[1] = 0x06; // Turn and Drop on
   if (aWithAutostart) {
     // auto-start default game in 15 secs
-    MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startGame, this, defaultTwoSided ? 0x03 : 0x01), 15*Second);
+    MainLoop::currentMainLoop().executeTicketOnce(
+      stateChangeTicket,
+      boost::bind(&BlocksPage::startGame, this, defaultMode),
+      (defaultMode & pagemode_startnow) ? 1*Second : 15*Second
+    );
   }
   else {
     // quit after a while
@@ -325,7 +329,7 @@ void BlocksPage::makeReady(bool aWithAutostart)
 }
 
 
-void BlocksPage::startGame(int aMode)
+void BlocksPage::startGame(PageMode aMode)
 {
   MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
   stop();
@@ -336,12 +340,12 @@ void BlocksPage::startGame(int aMode)
   ledState[0] = 0;
   ledState[1] = 0;
   gameState = game_running;
-  if (aMode & 0x01) {
+  if ((aMode & pagemode_controls1) || aMode==0) {
     // normal side
     launchRandomBlock(false);
     ledState[0] = 0x0F; // all 4 keys on
   }
-  if (aMode & 0x02) {
+  if (aMode & pagemode_controls2) {
     // other side
     launchRandomBlock(true);
     ledState[1] = 0x0F; // all 4 keys on
@@ -419,8 +423,8 @@ bool BlocksPage::handleKey(int aSide, int aKeyNum)
     }
     else if (aKeyNum==1) {
       // add to acculumator
-      playModeAccumulator |= aSide==1 ? 0x02 : 0x01;
-      ledState[aSide==1 ? 0 : 1] = 0x0F; // immediate feedback: all 4 keys on
+      playModeAccumulator |= aSide==1 ? pagemode_controls2 : pagemode_controls1;
+      ledState[aSide==1 ? 1 : 0] = 0x0F; // immediate feedback: all 4 keys on
       // but start with a little delay so other player can also join
       MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 2*Second);
     }

@@ -67,7 +67,7 @@ class PixelBoardD : public CmdLineApp
 
   // The display pages
   string defaultPageName;
-  bool defaultTwoSided;
+  PageMode defaultMode;
   PagesMap pages;
   PixelPagePtr currentPage; ///< the current page
 
@@ -82,7 +82,8 @@ public:
 
   PixelBoardD() :
     starttime(MainLoop::now()),
-    upsideDown(false)
+    upsideDown(false),
+    defaultMode(pagemode_controls1)
   {
   }
 
@@ -103,7 +104,7 @@ public:
       { 0  , "jsonapiport",    true,  "port;server port number for JSON API (default=none)" },
       { 0  , "jsonapinonlocal",false, "allow JSON API from non-local clients" },
       { 0  , "defaultpage",    true,  "display page;default page to show after start and after other page ends" },
-      { 0  , "twosided",       false, "defines if default page should run two-sided" },
+      { 0  , "defaultmode",    true,  "mode;defines default page mode: 1=normal, 2=reversed, 3=twosided" },
       { 0  , "image",          true,  "filename;image to show by default on display page" },
       { 0  , "message",        true,  "message;text to show from time to time on display page" },
       { 'l', "loglevel",       true,  "level;set max level of log message detail to show on stdout" },
@@ -148,7 +149,9 @@ public:
       }
 
       getStringOption("defaultpage", defaultPageName);
-      defaultTwoSided = getOption("twosided");
+      int m = defaultMode;
+      getIntOption("defaultmode", m);
+      defaultMode = m;
 
       // add pages
       // - display
@@ -217,7 +220,7 @@ public:
   }
 
 
-  void gotoPage(const string aPageName, bool aTwoSided)
+  void gotoPage(const string aPageName, PageMode aMode)
   {
     PagesMap::iterator pos = pages.find(aPageName);
     if (pos!=pages.end()) {
@@ -227,7 +230,7 @@ public:
       }
       // start new one
       currentPage = pos->second;
-      currentPage->show(aTwoSided);
+      currentPage->show(aMode);
     }
     updateDisplay();
   }
@@ -251,11 +254,11 @@ public:
     }
     else if (aInfo=="quit") {
       if (aPage.getName()=="display") {
-        gotoPage("blocks", defaultTwoSided);
+        gotoPage("blocks", defaultMode);
       }
       else {
         // back to default page
-        gotoPage(defaultPageName, defaultTwoSided);
+        gotoPage(defaultPageName, defaultMode);
       }
     }
   }
@@ -268,7 +271,7 @@ public:
     display->begin();
     display->show();
     MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
-    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::gotoPage, this, defaultPageName, defaultTwoSided), 2*Second);
+    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::gotoPage, this, defaultPageName, defaultMode), 2*Second);
   }
 
 
@@ -373,12 +376,12 @@ public:
     }
     else if (aUri=="board") {
       if (aIsAction) {
-        bool twoSided = false;
-        if (aData->get("twosided", o))
-          twoSided = o->boolValue();
+        PageMode mode = pagemode_controls1; // default to bottom controls
+        if (aData->get("mode", o))
+          mode = o->int32Value();
         if (aData->get("page", o)) {
           string page = o->stringValue();
-          gotoPage(page, twoSided);
+          gotoPage(page, mode);
         }
       }
       aRequestDoneCB(JsonObjectPtr(), ErrorPtr());

@@ -41,6 +41,14 @@ namespace p44 {
     uint8_t a; // alpha
   } PixelColor;
 
+
+  typedef enum {
+    pagemode_controls1 = 0x01,
+    pagemode_controls2 = 0x02,
+    pagemode_startnow = 0x03
+  };
+  typedef uint8_t PageMode;
+
   /// Utilities
   uint8_t dimVal(uint8_t aVal, uint8_t aDim);
   PixelColor dimPixel(const PixelColor aPix, uint8_t aDim);
@@ -71,8 +79,8 @@ namespace p44 {
     string getName() { return name; }
 
     /// start showing this page
-    /// @param aTwoSided expect two-sided usage of the page
-    virtual void show(bool aTwoSided) = 0;
+    /// @param aMode in what mode to show the page (0x01=bottom, 0x02=top, 0x03=both)
+    virtual void show(PageMode aMode) = 0;
 
     /// hide this page
     virtual void hide() = 0;

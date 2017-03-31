@@ -147,13 +147,13 @@ namespace p44 {
     int score[2]; ///< the score for the players
     int level; ///< the level
 
-    bool defaultTwoSided;
     long rowKillTicket;
     long stateChangeTicket;
 
     uint8_t ledState[2];
 
-    uint8_t playModeAccumulator;
+    PageMode playModeAccumulator;
+    PageMode defaultMode;
 
     TextViewPtr scoretext;
 
@@ -167,8 +167,8 @@ namespace p44 {
     BlocksPage(PixelPageInfoCB aInfoCallback);
 
     /// show
-    /// @param aTwoSided if set, default game is two-sided
-    virtual void show(bool aTwoSided) P44_OVERRIDE;
+    /// @param aMode in what mode to show the page (0x01=bottom, 0x02=top, 0x03=both)
+    virtual void show(PageMode aMode) P44_OVERRIDE;
 
     /// hide
     virtual void hide() P44_OVERRIDE;
@@ -234,7 +234,7 @@ namespace p44 {
     void stop();
     void makeReady(bool aWithAutostart);
     void startAccTimeout();
-    void startGame(int aMode); // 0x01=single player normal, 0x02=single player reversed, 0x03=dual player
+    void startGame(PageMode aMode); // 0x01=single player normal, 0x02=single player reversed, 0x03=dual player
     void gameOver();
     void removeRow(int aY, bool aBlockFromBottom, int aRemovedRows);
     void checkRows(bool aBlockFromBottom, int aRemovedRows);
