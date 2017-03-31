@@ -50,10 +50,15 @@ class PixelBoardD : public CmdLineApp
   ButtonInputPtr lower_right;
   ButtonInputPtr lower_turn;
   ButtonInputPtr lower_drop;
+  ButtonInputPtr upper_left;
+  ButtonInputPtr upper_right;
+  ButtonInputPtr upper_turn;
+  ButtonInputPtr upper_drop;
 
-  I2CDevicePtr touchDev;
-  I2CDevicePtr keyLedDev;
-  DigitalIoPtr touchSel;
+  I2CDevicePtr touchDevL;
+  I2CDevicePtr touchDevH;
+  I2CDevicePtr keyLedDevL;
+  I2CDevicePtr keyLedDevH;
   DigitalIoPtr touchDetect;
   uint8_t touchState[2];
 
@@ -90,7 +95,8 @@ public:
       { 0  , "touchsel",       true,  "pinspec;touchboard selection signal" },
       { 0  , "touchdetect",    true,  "pinspec;touchboard touch detect signal" },
       { 0  , "touchreset",     true,  "pinspec;touchboard reset signal" },
-      { 0  , "i2cbusno",       true,  "busno;i2c bus to use" },
+      { 0  , "i2cbuslow",      true,  "busno;i2c bus connected to the lower touchboard" },
+      { 0  , "i2cbushigh",     true,  "busno;i2c bus connected to the higher touchboard" },
       { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
@@ -160,6 +166,7 @@ public:
 
       if (getOption("consolekeys")) {
         // create the console keys
+        // - lower
         lower_left = ButtonInputPtr(new ButtonInput("simpin.left:j"));
         lower_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 0), false); // left
         lower_right = ButtonInputPtr(new ButtonInput("simpin.right:l"));
@@ -168,30 +175,40 @@ public:
         lower_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 1), false); // turn
         lower_drop = ButtonInputPtr(new ButtonInput("simpin.drop:m"));
         lower_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 2), false); // drop
+        // - upper
+        upper_left = ButtonInputPtr(new ButtonInput("simpin.left:a"));
+        upper_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 0), false); // left
+        upper_right = ButtonInputPtr(new ButtonInput("simpin.right:d"));
+        upper_right->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 3), false); // right
+        upper_turn = ButtonInputPtr(new ButtonInput("simpin.turn:s"));
+        upper_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 1), false); // turn
+        upper_drop = ButtonInputPtr(new ButtonInput("simpin.drop:x"));
+        upper_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 2), false); // drop
       }
 
       // create the touch pad controls
       if (!getOption("notouch")) {
-        string touchselname = "gpio.0";
-        string touchdetectname = "/gpio.15";
-        string touchresetname = "gpio.6";
-        getStringOption("touchsel", touchselname);
+        string touchdetectname = "/gpio.19";
+        string touchresetname = "gpio.15";
         getStringOption("touchdetect", touchdetectname);
         getStringOption("touchreset", touchresetname);
-        int i2cbus = 0;
-        getIntOption("i2cbusno", i2cbus);
+        int i2cBusL = 1;
+        int i2cBusH = 2;
+        getIntOption("i2cbuslow", i2cBusL);
+        getIntOption("i2cbushigh", i2cBusH);
         // prepare access to the touch chip
-        touchDev = I2CManager::sharedManager().getDevice(i2cbus, "generic@1B");
-        touchSel = DigitalIoPtr(new DigitalIo(touchselname.c_str(), true, false));
+        touchDevL = I2CManager::sharedManager().getDevice(i2cBusL, "generic@1B");
+        touchDevH = I2CManager::sharedManager().getDevice(i2cBusH, "generic@1B");
         touchDetect = DigitalIoPtr(new DigitalIo(touchdetectname.c_str(), false, false));
         uint8_t id, sta;
-        touchDev->getBus().SMBusReadByte(touchDev.get(), 0, id);
-        touchDev->getBus().SMBusReadByte(touchDev.get(), 0, sta);
+        touchDevL->getBus().SMBusReadByte(touchDevL.get(), 0, id);
+        touchDevL->getBus().SMBusReadByte(touchDevL.get(), 0, sta);
         LOG(LOG_NOTICE,"Device ID = 0x%02X, keystatus = 0x%02X", id, sta);
         touchState[0] = 0;
         touchState[1] = 0;
         // prepare access to the key LEDs
-        keyLedDev = I2CManager::sharedManager().getDevice(i2cbus, "generic@20");
+        keyLedDevL = I2CManager::sharedManager().getDevice(i2cBusL, "generic@20");
+        keyLedDevH = I2CManager::sharedManager().getDevice(i2cBusH, "generic@20");
       }
 
     } // if !terminated
@@ -418,18 +435,21 @@ public:
 
   void setLeds(int aSide, uint8_t aLedMask)
   {
-    touchSel->set(aSide==1); // select side
-    keyLedDev->getBus().SMBusReadByte(keyLedDev.get(), 0x14, aLedMask);
+    if (aSide==1)
+      keyLedDevH->getBus().SMBusWriteByte(keyLedDevH.get(), 0x14, aLedMask);
+    else
+      keyLedDevH->getBus().SMBusWriteByte(keyLedDevL.get(), 0x14, aLedMask);
   }
 
 
   void checkInputs()
   {
-    if (touchDev) {
-      uint8_t newState;
-      for (int side=0; side<2; side++) {
-        touchSel->set(side==1); // select side
-        touchDev->getBus().SMBusReadByte(touchDev.get(), 3, newState); // get key state
+    uint8_t newState;
+    for (int side=0; side<2; side++) {
+      I2CDevicePtr td = side==1 ? touchDevH : touchDevL;
+      I2CDevicePtr kd = side==1 ? keyLedDevH : keyLedDevL;
+      if (td) {
+        td->getBus().SMBusReadByte(td.get(), 3, newState); // get key state
         // clear those that were set in last call already
         uint8_t triggers;
         triggers = newState & ~touchState[side];
@@ -443,10 +463,10 @@ public:
         // update LEDs
         uint8_t leds = currentPage ? currentPage->keyLedState(reportedside) : 0;
         uint8_t ledmask = 0x1E & (~(leds<<1) & 0x1E);
-        keyLedDev->getBus().SMBusWriteByte(keyLedDev.get(), 0x14, ledmask);
+        kd->getBus().SMBusWriteByte(kd.get(), 0x14, ledmask);
       }
-      updateDisplay();
     }
+    updateDisplay();
   }
 
 
