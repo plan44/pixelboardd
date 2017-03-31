@@ -42,11 +42,11 @@ namespace p44 {
   } PixelColor;
 
 
-  typedef enum {
+  enum {
     pagemode_controls1 = 0x01,
     pagemode_controls2 = 0x02,
-    pagemode_startnow = 0x03
-  };
+    pagemode_startnow = 0x04
+  } PageModeEnum;
   typedef uint8_t PageMode;
 
   /// Utilities
