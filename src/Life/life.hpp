@@ -39,6 +39,7 @@ namespace p44 {
     PageMode defaultMode;
 
     long generationTicket;
+    long reviveTicket;
 
   public :
 
@@ -79,10 +80,12 @@ namespace p44 {
     void stop();
     void clear();
     void nextGeneration();
+    void timeNext();
+    void revive();
     int cellindex(int aX, int aY, bool aWrap);
     int calculateGeneration();
     void createRandomCells(int aMinCells, int aMaxCells);
-
+    void placePattern(uint16_t aPatternNo, bool aWrap=true, int aCenterX=-1, int aCenterY=-1, int aOrientation=-1);
   };
   typedef boost::intrusive_ptr<LifePage> LifePagePtr;
 
