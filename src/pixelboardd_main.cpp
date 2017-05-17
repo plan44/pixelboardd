@@ -29,6 +29,7 @@
 // Pages
 #include "blocks.hpp"
 #include "display.hpp"
+#include "life.hpp"
 
 using namespace p44;
 
@@ -74,6 +75,7 @@ class PixelBoardD : public CmdLineApp
   // pages
   DisplayPagePtr displayPage;
   BlocksPagePtr blocksPage;
+  LifePagePtr lifePage;
 
   MLMicroSeconds starttime;
 
@@ -165,6 +167,8 @@ public:
       }
       // - blocks
       blocksPage = BlocksPagePtr(new BlocksPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
+      // - life
+      lifePage = LifePagePtr(new LifePage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
 
 
       if (getOption("consolekeys")) {
@@ -253,13 +257,14 @@ public:
       }
     }
     else if (aInfo=="quit") {
-      if (aPage.getName()=="display") {
-        gotoPage("blocks", defaultMode);
-      }
-      else {
-        // back to default page
-        gotoPage(defaultPageName, defaultMode);
-      }
+      // back to default page
+      gotoPage(defaultPageName, defaultMode);
+    }
+    else if (aInfo=="go0") {
+      gotoPage("blocks", defaultMode);
+    }
+    else if (aInfo=="go3") {
+      gotoPage("life", defaultMode);
     }
   }
 

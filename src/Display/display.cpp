@@ -150,7 +150,13 @@ void DisplayPage::setDefaultMessage(const string aMessage)
 
 bool DisplayPage::handleKey(int aSide, int aKeyNum)
 {
-  inherited::handleKey(aSide, aKeyNum);
+  //inherited::handleKey(aSide, aKeyNum);
+  switch (aKeyNum) {
+    case 0 : postInfo("go0"); break;
+    case 1 : postInfo("go1"); break;
+    case 2 : postInfo("go2"); break;
+    case 3 : postInfo("go3"); break;
+  }
   return false; // let next page handle the keys again
 }
 

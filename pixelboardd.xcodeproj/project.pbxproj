@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		ED23829E1E1190F500F1FE4F /* pixelpage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23829B1E117BD000F1FE4F /* pixelpage.cpp */; };
 		ED2382A51E140D4A00F1FE4F /* textview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2382A31E140D4A00F1FE4F /* textview.cpp */; };
+		ED43A9691ECB8B1B00FBC0FF /* life.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED43A9671ECB8B1B00FBC0FF /* life.cpp */; };
 		ED5372601DFC28D00066FF5A /* pixelboardd_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */; };
 		ED53729B1DFC2CBE0066FF5A /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372671DFC2CBE0066FF5A /* application.cpp */; };
 		ED53729C1DFC2CBE0066FF5A /* colorutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372691DFC2CBE0066FF5A /* colorutils.cpp */; };
@@ -63,6 +64,8 @@
 		ED2382A11E12B55E00F1FE4F /* torch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = torch.hpp; sourceTree = "<group>"; };
 		ED2382A31E140D4A00F1FE4F /* textview.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textview.cpp; sourceTree = "<group>"; };
 		ED2382A41E140D4A00F1FE4F /* textview.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = textview.hpp; sourceTree = "<group>"; };
+		ED43A9671ECB8B1B00FBC0FF /* life.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = life.cpp; sourceTree = "<group>"; };
+		ED43A9681ECB8B1B00FBC0FF /* life.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = life.hpp; sourceTree = "<group>"; };
 		ED53725C1DFC28D00066FF5A /* pixelboardd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pixelboardd; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pixelboardd_main.cpp; sourceTree = "<group>"; };
 		ED5372671DFC2CBE0066FF5A /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
@@ -154,6 +157,15 @@
 			path = Torch;
 			sourceTree = "<group>";
 		};
+		ED43A9661ECB8B1B00FBC0FF /* life */ = {
+			isa = PBXGroup;
+			children = (
+				ED43A9671ECB8B1B00FBC0FF /* life.cpp */,
+				ED43A9681ECB8B1B00FBC0FF /* life.hpp */,
+			);
+			path = life;
+			sourceTree = "<group>";
+		};
 		ED5372531DFC28D00066FF5A = {
 			isa = PBXGroup;
 			children = (
@@ -175,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				ED5372661DFC2C6D0066FF5A /* p44utils */,
+				ED43A9661ECB8B1B00FBC0FF /* life */,
 				ED8E64631DFDC62A00B66723 /* Blocks */,
 				ED23829F1E12B4AF00F1FE4F /* Torch */,
 				ED8E64621DFDC61800B66723 /* Display */,
@@ -395,6 +408,7 @@
 				ED5372A31DFC2CBE0066FF5A /* i2c.cpp in Sources */,
 				ED5372A01DFC2CBE0066FF5A /* fdcomm.cpp in Sources */,
 				ED53729D1DFC2CBE0066FF5A /* consolekey.cpp in Sources */,
+				ED43A9691ECB8B1B00FBC0FF /* life.cpp in Sources */,
 				ED53729E1DFC2CBE0066FF5A /* digitalio.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
