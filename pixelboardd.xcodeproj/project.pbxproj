@@ -157,13 +157,13 @@
 			path = Torch;
 			sourceTree = "<group>";
 		};
-		ED43A9661ECB8B1B00FBC0FF /* life */ = {
+		ED43A9661ECB8B1B00FBC0FF /* Life */ = {
 			isa = PBXGroup;
 			children = (
 				ED43A9671ECB8B1B00FBC0FF /* life.cpp */,
 				ED43A9681ECB8B1B00FBC0FF /* life.hpp */,
 			);
-			path = life;
+			path = Life;
 			sourceTree = "<group>";
 		};
 		ED5372531DFC28D00066FF5A = {
@@ -187,7 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				ED5372661DFC2C6D0066FF5A /* p44utils */,
-				ED43A9661ECB8B1B00FBC0FF /* life */,
+				ED43A9661ECB8B1B00FBC0FF /* Life */,
 				ED8E64631DFDC62A00B66723 /* Blocks */,
 				ED23829F1E12B4AF00F1FE4F /* Torch */,
 				ED8E64621DFDC61800B66723 /* Display */,

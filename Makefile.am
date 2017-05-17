@@ -28,6 +28,7 @@ pixelboardd_CXXFLAGS = \
   -I ${srcdir}/src/p44utils/thirdparty \
   -I ${srcdir}/src \
   -I ${srcdir}/src/Blocks \
+  -I ${srcdir}/src/Life \
   -I ${srcdir}/src/Display \
   -I ${srcdir}/src/Torch \
   -D DISABLE_I2C=0 \
@@ -115,6 +116,8 @@ pixelboardd_SOURCES = \
   src/p44utils/p44utils_common.hpp \
   src/Blocks/blocks.cpp \
   src/Blocks/blocks.hpp \
+  src/Life/life.cpp \
+  src/Life/life.hpp \
   src/Display/display.cpp \
   src/Display/display.hpp \
   src/Torch/torch.cpp \
