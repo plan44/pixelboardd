@@ -350,12 +350,12 @@ void BlocksPage::startGame(PageMode aMode)
   if ((gameMode & pagemode_controls1) || gameMode==0) {
     // normal side
     launchRandomBlock(false);
-    ledState[0] = keycode_all; // all 4 keys on
+    ledState[0] = keycode_all;
   }
   if (gameMode & pagemode_controls2) {
     // other side
     launchRandomBlock(true);
-    ledState[1] = keycode_all; // all 4 keys on
+    ledState[1] = keycode_all;
   }
 }
 
@@ -363,16 +363,17 @@ void BlocksPage::startGame(PageMode aMode)
 void BlocksPage::pause()
 {
   gameState = game_paused;
-  ledState[0] = keycode_inner;
-  ledState[1] = keycode_inner;
+  if (enabledSide(0)) ledState[0] = keycode_middleleft;
+  if (enabledSide(1)) ledState[1] = keycode_middleleft;
 }
 
 
 void BlocksPage::resume()
 {
   gameState = game_running;
+  if (enabledSide(0)) ledState[0] = keycode_all;
+  if (enabledSide(1)) ledState[1] = keycode_all;
 }
-
 
 
 
@@ -440,10 +441,10 @@ KeyCodes BlocksPage::keyLedState(int aSide)
 bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
   if (gameState==game_paused && enabledSide(aSide)) {
-    if (aNewPressedKeys & keycode_inner) {
+    if (aNewPressedKeys & keycode_middleleft) {
       resume();
     }
-    if (aNewPressedKeys & keycode_outer) {
+    if (aNewPressedKeys & keycode_middleright) {
       postInfo("quit");
     }
   }
@@ -456,7 +457,7 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
       // but start with a little delay so other player can also join
       MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 2*Second);
     }
-    else {
+    else if (aNewPressedKeys) {
       postInfo("quit");
     }
   }
