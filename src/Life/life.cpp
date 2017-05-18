@@ -32,7 +32,7 @@ LifePage::LifePage(PixelPageInfoCB aInfoCallback) :
   defaultMode(0x01),
   generationInterval(777*MilliSecond),
   generationTicket(0),
-  reviveTicket(0)
+  staticcount(0)
 {
   stop();
 }
@@ -46,7 +46,6 @@ void LifePage::hide()
 
 void LifePage::clear()
 {
-  MainLoop::currentMainLoop().cancelExecutionTicket(reviveTicket);
   for (int i=0; i<PAGE_NUMPIXELS; ++i) {
     cells[i] = 0;
   }
@@ -68,9 +67,9 @@ void LifePage::show(PageMode aMode)
   // make ready
   int transitioning;
   do {
-    createRandomCells(20,30);
+    createRandomCells(7,23);
     transitioning = calculateGeneration();
-  } while (transitioning<17);
+  } while (transitioning<4);
   // start
   nextGeneration();
 }
@@ -84,15 +83,17 @@ bool LifePage::step()
 
 void LifePage::nextGeneration()
 {
-  int transitioning = calculateGeneration();
-  if (transitioning==0) {
-    if (reviveTicket==0) {
-      // died out or became static
-      MainLoop::currentMainLoop().executeTicketOnce(reviveTicket, boost::bind(&LifePage::revive, this), generationInterval*10);
+  int dynamics = calculateGeneration();
+  if (dynamics==0) {
+    staticcount++;
+    LOG(LOG_INFO, "No dynamics for %d cycles", staticcount);
+    if (staticcount>10) {
+      revive();
     }
   }
-  else if (reviveTicket) {
-    MainLoop::currentMainLoop().cancelExecutionTicket(reviveTicket);
+  else {
+    staticcount -= 2;
+    if (staticcount<0) staticcount = 0;
   }
   // next generation
   timeNext();
@@ -108,9 +109,8 @@ void LifePage::timeNext()
 
 void LifePage::revive()
 {
-  MainLoop::currentMainLoop().cancelExecutionTicket(reviveTicket);
   // shoot in some new cells
-  createRandomCells(12,42);
+  createRandomCells(11,33);
   // re-start
   timeNext();
   makeDirty();
@@ -142,7 +142,7 @@ int LifePage::cellindex(int aX, int aY, bool aWrap)
 
 int LifePage::calculateGeneration()
 {
-  int transitioning = 0;
+  int dynamics = 0;
   // cell age 0 : dead for longer
   // cell age 1 : killed in this cycle
   // cell age 2...n : living, with
@@ -187,7 +187,7 @@ int LifePage::calculateGeneration()
         // - Any live cell with more than three live neighbours dies, as if by overpopulation.
         if (nn<2 || nn>3) {
           cells[ci] = 1; // will die at end of this cycle (but still alive for calculation)
-          transitioning++; // a dying cell is a transition
+          dynamics--; // a dying cell is a transition
         }
         // - Any live cell with two or three live neighbours lives on to the next generation.
       }
@@ -196,18 +196,18 @@ int LifePage::calculateGeneration()
         // - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
         if (nn==3) {
           cells[ci] = 3; // spawned
-          transitioning++; // a new cell is a transition
+          dynamics++; // a new cell is a transition
         }
       }
     }
   }
-  return transitioning;
+  return dynamics;
 }
 
 
 void LifePage::createRandomCells(int aMinCells, int aMaxCells)
 {
-  int numcells = rand() % (aMaxCells-aMinCells+1);
+  int numcells = aMinCells + rand() % (aMaxCells-aMinCells+1);
   while (numcells-- > 0) {
     int ci = rand() % PAGE_NUMPIXELS;
     cells[ci] = 2; // created out of void
@@ -311,11 +311,21 @@ PixelColor LifePage::colorAt(int aX, int aY)
   }
   else {
     age -= 3;
-    pix.r = 255;
-    if (age<8)
-      pix.g = (7-age)*32;
-    else
-      pix.g = 0; // higher ages are just red
+    if (age<8) {
+      pix.r = 255;
+      pix.g = (7-age)*32; // remove green over first 8 cycles
+    }
+    else if (age<24) {
+      pix.b = (age-8)*12; // add blue over next 16 cycles
+      pix.r = 128+(23-age)*8; // ...and remove half of red already
+    }
+    else if (age<56) {
+      pix.b = 192;
+      pix.r = (55-age)*4; // remove rest of red over next 32 cycles
+    }
+    else {
+      pix.b = 255; // stone age
+    }
   }
   return pix;
 }
@@ -335,28 +345,32 @@ KeyCodes LifePage::keyLedState(int aSide)
 
 bool LifePage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
-  if (aSide==0) {
-    if (aNewPressedKeys & keycode_left)
-      clear();
-    else if (aNewPressedKeys & keycode_middleleft)
-      revive();
-    else if (aNewPressedKeys & keycode_middleright)
-      postInfo("quit");
-    else if (aNewPressedKeys & keycode_right)
-      placePattern(5); // diehard
+  if (aNewPressedKeys) {
+    if (aSide==0) {
+      if (aNewPressedKeys & keycode_left)
+        clear();
+      else if (aNewPressedKeys & keycode_middleleft)
+        createRandomCells(3,42);
+      else if (aNewPressedKeys & keycode_middleright)
+        postInfo("quit");
+      else if (aNewPressedKeys & keycode_right)
+        placePattern(5); // diehard
+    }
+    else {
+      if (aNewPressedKeys & keycode_left)
+        placePattern(2); // beacon
+      else if (aNewPressedKeys & keycode_middleleft)
+        placePattern(3, false, 5, 10, 0); // pentadecathlon centered
+      else if (aNewPressedKeys & keycode_middleright)
+        placePattern(7); // glider
+      else if (aNewPressedKeys & keycode_right)
+        placePattern(6); // acorn
+    }
+    timeNext();
+    makeDirty();
+    // reset count of static cycles / autospray trigger
+    staticcount = 0;
   }
-  else {
-    if (aNewPressedKeys & keycode_left)
-      placePattern(2); // beacon
-    else if (aNewPressedKeys & keycode_middleleft)
-      placePattern(3, false, 5, 10, 0); // pentadecathlon centered
-    else if (aNewPressedKeys & keycode_middleright)
-      placePattern(7); // glider
-    else if (aNewPressedKeys & keycode_right)
-      placePattern(6); // acorn
-  }
-  timeNext();
-  makeDirty();
   return true; // fully handled
 }
 

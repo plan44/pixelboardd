@@ -39,7 +39,8 @@ namespace p44 {
     PageMode defaultMode;
 
     long generationTicket;
-    long reviveTicket;
+
+    int staticcount;
 
   public :
 
