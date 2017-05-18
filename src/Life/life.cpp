@@ -88,7 +88,7 @@ void LifePage::nextGeneration()
   if (transitioning==0) {
     if (reviveTicket==0) {
       // died out or became static
-      MainLoop::currentMainLoop().executeTicketOnce(reviveTicket, boost::bind(&LifePage::revive, this), generationInterval*15);
+      MainLoop::currentMainLoop().executeTicketOnce(reviveTicket, boost::bind(&LifePage::revive, this), generationInterval*10);
     }
   }
   else if (reviveTicket) {
@@ -108,6 +108,7 @@ void LifePage::timeNext()
 
 void LifePage::revive()
 {
+  MainLoop::currentMainLoop().cancelExecutionTicket(reviveTicket);
   // shoot in some new cells
   createRandomCells(12,42);
   // re-start
@@ -211,7 +212,6 @@ void LifePage::createRandomCells(int aMinCells, int aMaxCells)
     int ci = rand() % PAGE_NUMPIXELS;
     cells[ci] = 2; // created out of void
   }
-  MainLoop::currentMainLoop().rescheduleExecutionTicket(generationTicket, generationInterval);
   makeDirty();
 }
 
@@ -322,34 +322,38 @@ PixelColor LifePage::colorAt(int aX, int aY)
 
 
 
-uint8_t LifePage::keyLedState(int aSide)
+KeyCodes LifePage::keyLedState(int aSide)
 {
   if (aSide==0) {
-    return 0x0B;
+    return keycode_outer+keycode_middleleft;
   }
   else {
-    return 0x0F;
+    return keycode_all;
   }
 }
 
 
-bool LifePage::handleKey(int aSide, int aKeyNum)
+bool LifePage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
   if (aSide==0) {
-    switch (aKeyNum) {
-      case 0 : clear(); break; // left
-      case 1 : revive(); break; // right
-      case 2 : postInfo("quit"); break; // drop
-      case 3 : placePattern(5); break; // diehard
-    }
+    if (aNewPressedKeys & keycode_left)
+      clear();
+    else if (aNewPressedKeys & keycode_middleleft)
+      revive();
+    else if (aNewPressedKeys & keycode_middleright)
+      postInfo("quit");
+    else if (aNewPressedKeys & keycode_right)
+      placePattern(5); // diehard
   }
   else {
-    switch (aKeyNum) {
-      case 0 : placePattern(2); break; // beacon
-      case 1 : placePattern(3, false, 5, 10, 0); break; // pentadecathlon centered
-      case 2 : placePattern(7); break; // glider
-      case 3 : placePattern(6); break; // acorn
-    }
+    if (aNewPressedKeys & keycode_left)
+      placePattern(2); // beacon
+    else if (aNewPressedKeys & keycode_middleleft)
+      placePattern(3, false, 5, 10, 0); // pentadecathlon centered
+    else if (aNewPressedKeys & keycode_middleright)
+      placePattern(7); // glider
+    else if (aNewPressedKeys & keycode_right)
+      placePattern(6); // acorn
   }
   timeNext();
   makeDirty();

@@ -63,6 +63,19 @@ namespace p44 {
   typedef boost::function<void (JsonObjectPtr aResponse, ErrorPtr aError)> RequestDoneCB;
 
 
+  typedef enum {
+    keycode_none = 0,
+    keycode_left = 0x01,
+    keycode_middleleft = 0x02,
+    keycode_middleright = 0x04,
+    keycode_right = 0x08,
+    keycode_outer = 0x09,
+    keycode_inner = 0x06,
+    keycode_all = 0x0F
+  } KeyCodesEnum;
+  typedef uint8_t KeyCodes;
+
+
   class PixelPage : public P44Obj
   {
 
@@ -92,14 +105,16 @@ namespace p44 {
 
     /// handle key events
     /// @param aSide which side of the board (0=bottom, 1=top)
-    /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
+    /// @param aNewPressedKeys combined keycodes of keys newly detected pressed in this event.
+    ///   Can be keycode_none for events signalling only released keys
+    /// @param aCurrentPressed combined keycodes of keys currently pressed
     /// @return true if fully handled, false if next page should handle it as well
-    virtual bool handleKey(int aSide, int aKeyNum);
+    virtual bool handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed);
 
     /// get key LED status
     /// @param aSide which side of the board (0=bottom, 1=top)
     /// @return bits 0..3 correspond to LEDs for key 0..3
-    virtual uint8_t keyLedState(int aSide) { return 0; }
+    virtual KeyCodes keyLedState(int aSide) { return keycode_none; }
 
     /// handle API requests
     /// @param aRequest JSON request

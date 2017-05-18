@@ -55,6 +55,7 @@ class PixelBoardD : public CmdLineApp
   ButtonInputPtr upper_right;
   ButtonInputPtr upper_turn;
   ButtonInputPtr upper_drop;
+  ButtonInputPtr pause;
 
   I2CDevicePtr touchDevL;
   I2CDevicePtr touchDevH;
@@ -175,22 +176,25 @@ public:
         // create the console keys
         // - lower
         lower_left = ButtonInputPtr(new ButtonInput("simpin.left:j"));
-        lower_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 0), false); // left
+        lower_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, keycode_left, keycode_none), false);
         lower_right = ButtonInputPtr(new ButtonInput("simpin.right:l"));
-        lower_right->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 3), false); // right
+        lower_right->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, keycode_right, keycode_none), false);
         lower_turn = ButtonInputPtr(new ButtonInput("simpin.turn:k"));
-        lower_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 1), false); // turn
+        lower_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, keycode_middleleft, keycode_none), false);
         lower_drop = ButtonInputPtr(new ButtonInput("simpin.drop:m"));
-        lower_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, 2), false); // drop
+        lower_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, keycode_middleright, keycode_none), false);
         // - upper
         upper_left = ButtonInputPtr(new ButtonInput("simpin.left:a"));
-        upper_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 0), false); // left
+        upper_left->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, keycode_left, keycode_none), false);
         upper_right = ButtonInputPtr(new ButtonInput("simpin.right:d"));
-        upper_right->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 3), false); // right
+        upper_right->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, keycode_right, keycode_none), false);
         upper_turn = ButtonInputPtr(new ButtonInput("simpin.turn:s"));
-        upper_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 1), false); // turn
+        upper_turn->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, keycode_middleleft, keycode_none), false);
         upper_drop = ButtonInputPtr(new ButtonInput("simpin.drop:x"));
-        upper_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, 2), false); // drop
+        upper_drop->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 1, keycode_middleright, keycode_none), false);
+        // - special pause combination on lower keys
+        pause = ButtonInputPtr(new ButtonInput("simpin.pause:p"));
+        pause->setButtonHandler(boost::bind(&PixelBoardD::keyHandler, this, 0, keycode_outer, keycode_outer), false);
       }
 
       // create the touch pad controls
@@ -366,14 +370,15 @@ public:
       if (aIsAction) {
         if (aData->get("key", o)) {
           string key = o->stringValue();
+          // Note: assume keys are already released when event is reported
           if (key=="left")
-            keyHandler(side, 0); // left
+            keyHandler(side, keycode_left, keycode_none);
           else if (key=="right")
-            keyHandler(side, 3); // right
+            keyHandler(side, keycode_right, keycode_none);
           else if (key=="turn")
-            keyHandler(side, 1); // turn
+            keyHandler(side, keycode_middleleft, keycode_none);
           else if (key=="drop")
-            keyHandler(side, 2); // drop
+            keyHandler(side, keycode_middleright, keycode_none);
         }
       }
       aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
@@ -462,12 +467,14 @@ public:
         uint8_t triggers;
         triggers = newState & ~touchState[side];
         LOG(triggers ? LOG_INFO : LOG_DEBUG, "checkInputs: side=%d, touchState=0x%02X, newState=0x%02X, triggers=0x%02X", side, touchState[side], newState, triggers);
-        touchState[side] = newState;
         int reportedside = upsideDown ? 1-side : side; // report sides reversed when board is (physically) used upside down.
-        if (triggers & 0x02) keyHandler(reportedside, 0); // left
-        else if (triggers & 0x10) keyHandler(reportedside, 3); // right
-        else if (triggers & 0x04) keyHandler(reportedside, 1); // turn
-        else if (triggers & 0x08) keyHandler(reportedside, 2); // drop
+        KeyCodes newcodes = (KeyCodes)((triggers>>1) & 0x0F);
+        KeyCodes pressed = (KeyCodes)((newState>>1) & 0x0F);
+        if (touchState[side] != newState) {
+          // report all changes, even if no new pressed key, just released ones
+          keyHandler(reportedside, newcodes, pressed);
+          touchState[side] = newState;
+        }
         // update LEDs
         uint8_t leds = currentPage ? currentPage->keyLedState(reportedside) : 0;
         uint8_t ledmask = 0x1E & (~(leds<<1) & 0x1E);
@@ -508,13 +515,24 @@ public:
   }
 
 
-  void keyHandler(int aSide, int aKeyNum)
+  void keyHandler(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
   {
+    LOG(LOG_INFO, "Posting key changes from side %d : New: %c%c%c%c - Pressed %c%c%c%c",
+      aSide,
+      aNewPressedKeys & keycode_left ? 'L' : '-',
+      aNewPressedKeys & keycode_middleleft ? 'T' : '-',
+      aNewPressedKeys & keycode_middleright ? 'D' : '-',
+      aNewPressedKeys & keycode_right ? 'R' : '-',
+      aCurrentPressed & keycode_left ? 'L' : '-',
+      aCurrentPressed & keycode_middleleft ? 'T' : '-',
+      aCurrentPressed & keycode_middleright ? 'D' : '-',
+      aCurrentPressed & keycode_right ? 'R' : '-'
+    );
     if (currentPage) {
-      bool handled = currentPage->handleKey(aSide, aKeyNum);
+      bool handled = currentPage->handleKey(aSide, aNewPressedKeys, aCurrentPressed);
       if (!handled && currentPage) {
         // probably another page is now active, let it handle the key as well
-        currentPage->handleKey(aSide, aKeyNum);
+        currentPage->handleKey(aSide, aNewPressedKeys, aCurrentPressed);
       }
     }
     updateDisplay();

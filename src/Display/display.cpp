@@ -148,16 +148,21 @@ void DisplayPage::setDefaultMessage(const string aMessage)
 }
 
 
-bool DisplayPage::handleKey(int aSide, int aKeyNum)
+bool DisplayPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
-  //inherited::handleKey(aSide, aKeyNum);
-  switch (aKeyNum) {
-    case 0 : postInfo("go0"); break;
-    case 1 : postInfo("go1"); break;
-    case 2 : postInfo("go2"); break;
-    case 3 : postInfo("go3"); break;
+  if (aNewPressedKeys & keycode_left) {
+    postInfo("go0");
   }
-  return false; // let next page handle the keys again
+  else if (aNewPressedKeys & keycode_middleleft) {
+    postInfo("go1");
+  }
+  else if (aNewPressedKeys & keycode_middleright) {
+    postInfo("go2");
+  }
+  if (aNewPressedKeys & keycode_right) {
+    postInfo("go3");
+  }
+  return true; // done
 }
 
 

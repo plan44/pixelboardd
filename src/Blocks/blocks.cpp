@@ -256,6 +256,7 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   rowKillDelay(0.15*Second),
   defaultMode(0x01),
   gameState(game_ready),
+  gameMode(0),
   playModeAccumulator(0),
   rowKillTicket(0),
   stateChangeTicket(0)
@@ -292,10 +293,9 @@ void BlocksPage::stop()
     BlockRunner *b = &activeBlocks[bi];
     if (b->block) b->block->dim(); // dim it, no longer live
     b->block = NULL; // forget it
-    ledState[bi] = 0; // LEDs off
+    ledState[bi] = keycode_none; // LEDs off
   }
 }
-
 
 
 void BlocksPage::show(PageMode aMode)
@@ -311,8 +311,8 @@ void BlocksPage::makeReady(bool aWithAutostart)
   gameState = game_ready;
   playModeAccumulator = 0;
   // show start keys
-  ledState[0] = 0x06; // Turn and Drop on
-  ledState[1] = 0x06; // Turn and Drop on
+  ledState[0] = keycode_middleleft; // Turn = start
+  ledState[1] = keycode_middleleft; // Turn = start
   if (aWithAutostart) {
     // auto-start default game in 15 secs
     MainLoop::currentMainLoop().executeTicketOnce(
@@ -329,36 +329,59 @@ void BlocksPage::makeReady(bool aWithAutostart)
 }
 
 
+bool BlocksPage::enabledSide(int aSide)
+{
+  return (gameMode & (aSide==1 ? pagemode_controls2 : pagemode_controls1)) != 0;
+}
+
+
 void BlocksPage::startGame(PageMode aMode)
 {
+  gameMode = aMode;
   MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
   stop();
   clear();
   level = 0;
   score[0] = 0;
   score[1] = 0;
-  ledState[0] = 0;
-  ledState[1] = 0;
+  ledState[0] = keycode_none;
+  ledState[1] = keycode_none;
   gameState = game_running;
-  if ((aMode & pagemode_controls1) || aMode==0) {
+  if ((gameMode & pagemode_controls1) || gameMode==0) {
     // normal side
     launchRandomBlock(false);
-    ledState[0] = 0x0F; // all 4 keys on
+    ledState[0] = keycode_all; // all 4 keys on
   }
-  if (aMode & pagemode_controls2) {
+  if (gameMode & pagemode_controls2) {
     // other side
     launchRandomBlock(true);
-    ledState[1] = 0x0F; // all 4 keys on
+    ledState[1] = keycode_all; // all 4 keys on
   }
 }
+
+
+void BlocksPage::pause()
+{
+  gameState = game_paused;
+  ledState[0] = keycode_inner;
+  ledState[1] = keycode_inner;
+}
+
+
+void BlocksPage::resume()
+{
+  gameState = game_running;
+}
+
+
 
 
 void BlocksPage::gameOver()
 {
   gameState = game_over;
   MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
-  ledState[0] = 0; // LEDs off
-  ledState[1] = 0; // LEDs off
+  ledState[0] = keycode_none; // LEDs off
+  ledState[1] = keycode_none; // LEDs off
   scoretext->setText(string_format("%d", score[0]+score[1]), true);
   makeDirty();
 }
@@ -408,36 +431,59 @@ void BlocksPage::setColorCodeAt(ColorCode aColorCode, int aX, int aY)
 }
 
 
-uint8_t BlocksPage::keyLedState(int aSide)
+KeyCodes BlocksPage::keyLedState(int aSide)
 {
   return ledState[aSide];
 }
 
 
-bool BlocksPage::handleKey(int aSide, int aKeyNum)
+bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
-  if (gameState==game_ready) {
-    // left or right restarts, drop exits
-    if (aKeyNum==2) {
+  if (gameState==game_paused && enabledSide(aSide)) {
+    if (aNewPressedKeys & keycode_inner) {
+      resume();
+    }
+    if (aNewPressedKeys & keycode_outer) {
       postInfo("quit");
     }
-    else if (aKeyNum==1) {
+  }
+  else if (gameState==game_ready) {
+    // turn starts (after 2 seconds timeout), others exit game
+    if (aNewPressedKeys & keycode_middleleft) {
       // add to acculumator
       playModeAccumulator |= aSide==1 ? pagemode_controls2 : pagemode_controls1;
-      ledState[aSide==1 ? 1 : 0] = 0x0F; // immediate feedback: all 4 keys on
+      ledState[aSide==1 ? 1 : 0] = keycode_all; // immediate feedback: all 4 keys on
       // but start with a little delay so other player can also join
       MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 2*Second);
     }
+    else {
+      postInfo("quit");
+    }
   }
-  else if (gameState==game_running) {
+  else if (gameState==game_running && enabledSide(aSide)) {
     int movement = 0;
     int rotation = 0;
     bool drop = false;
-    switch (aKeyNum) {
-      case 0 : movement = -1; break; // left
-      case 1 : rotation = 1; break; // turn
-      case 2 : drop = true; break; // drop
-      case 3 : movement = 1; break; // right
+    // check special multi-key
+    if (
+      (aNewPressedKeys & keycode_outer) &&
+      (aCurrentPressed & keycode_outer)==keycode_outer
+    ) {
+      pause();
+      return true;
+    }
+    // prioritize moves over turn over drop
+    if (aNewPressedKeys & keycode_left) {
+      movement = -1;
+    }
+    else if (aNewPressedKeys & keycode_right) {
+      movement = 1;
+    }
+    else if (aNewPressedKeys & keycode_middleleft) {
+      rotation = 1;
+    }
+    else if (aNewPressedKeys & keycode_middleright) {
+      drop = true;
     }
     // movement X is right edge, so need to swap for bottom end keys
     if (aSide==0) movement = -movement;

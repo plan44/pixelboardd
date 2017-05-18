@@ -134,9 +134,12 @@ namespace p44 {
   {
     enum {
       game_ready,
+      game_paused,
       game_running,
       game_over
     } gameState;
+
+    PageMode gameMode;
 
     typedef PixelPage inherited;
     friend class Block;
@@ -180,14 +183,16 @@ namespace p44 {
 
     /// handle key events
     /// @param aSide which side of the board (0=bottom, 1=top)
-    /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
+    /// @param aNewPressedKeys combined keycodes of keys newly detected pressed in this event.
+    ///   Can be keycode_none for events signalling only released keys
+    /// @param aCurrentPressed combined keycodes of keys currently pressed
     /// @return true if fully handled, false if next page should handle it as well
-    virtual bool handleKey(int aSide, int aKeyNum) P44_OVERRIDE;
+    virtual bool handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed) P44_OVERRIDE;
 
     /// get key LED status
     /// @param aSide which side of the board (0=bottom, 1=top)
     /// @return bits 0..3 correspond to LEDs for key 0..3
-    virtual uint8_t keyLedState(int aSide) P44_OVERRIDE;
+    virtual KeyCodes keyLedState(int aSide) P44_OVERRIDE;
 
     /// get color at X,Y
     /// @param aX PlayField X coordinate
@@ -234,7 +239,10 @@ namespace p44 {
     void stop();
     void makeReady(bool aWithAutostart);
     void startAccTimeout();
+    bool enabledSide(int aSide);
     void startGame(PageMode aMode); // 0x01=single player normal, 0x02=single player reversed, 0x03=dual player
+    void pause();
+    void resume();
     void gameOver();
     void removeRow(int aY, bool aBlockFromBottom, int aRemovedRows);
     void checkRows(bool aBlockFromBottom, int aRemovedRows);

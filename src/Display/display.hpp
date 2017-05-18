@@ -78,9 +78,11 @@ namespace p44 {
 
     /// handle key events
     /// @param aSide which side of the board (0=bottom, 1=top)
-    /// @param aKeyNum key number 0..3 (on keypads: left==0...right==3)
+    /// @param aNewPressedKeys combined keycodes of keys newly detected pressed in this event.
+    ///   Can be keycode_none for events signalling only released keys
+    /// @param aCurrentPressed combined keycodes of keys currently pressed
     /// @return true if fully handled, false if next page should handle it as well
-    virtual bool handleKey(int aSide, int aKeyNum) P44_OVERRIDE;
+    virtual bool handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed) P44_OVERRIDE;
 
     /// handle API requests
     /// @param aRequest JSON request
