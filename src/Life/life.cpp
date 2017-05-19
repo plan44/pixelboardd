@@ -65,11 +65,10 @@ void LifePage::show(PageMode aMode)
 {
   defaultMode = aMode;
   // make ready
-  int transitioning;
   do {
     createRandomCells(7,23);
-    transitioning = calculateGeneration();
-  } while (transitioning<4);
+    calculateGeneration();
+  } while (dynamics<4);
   // start
   nextGeneration();
 }
@@ -83,17 +82,23 @@ bool LifePage::step()
 
 void LifePage::nextGeneration()
 {
-  int dynamics = calculateGeneration();
+  calculateGeneration();
   if (dynamics==0) {
     staticcount++;
-    LOG(LOG_INFO, "No dynamics for %d cycles", staticcount);
-    if (staticcount>10) {
+    LOG(LOG_NOTICE, "No dynamics for %d cycles, population is %d", staticcount, population);
+    if (staticcount>23 || (population<9 && staticcount>10)) {
       revive();
     }
   }
   else {
-    staticcount -= 2;
-    if (staticcount<0) staticcount = 0;
+    if (staticcount>0) {
+      staticcount -= 2;
+      if (staticcount<0) staticcount = 0;
+      LOG(LOG_NOTICE, "Dynamics (%+d) in this cycle, population is %d, reduced staticount to %d", dynamics, population, staticcount);
+    }
+    else {
+      LOG(LOG_INFO, "Dynamics (%+d) in this cycle, population is %d", dynamics, population);
+    }
   }
   // next generation
   timeNext();
@@ -140,9 +145,10 @@ int LifePage::cellindex(int aX, int aY, bool aWrap)
 }
 
 
-int LifePage::calculateGeneration()
+void LifePage::calculateGeneration()
 {
-  int dynamics = 0;
+  dynamics = 0;
+  population = 0;
   // cell age 0 : dead for longer
   // cell age 1 : killed in this cycle
   // cell age 2...n : living, with
@@ -189,6 +195,9 @@ int LifePage::calculateGeneration()
           cells[ci] = 1; // will die at end of this cycle (but still alive for calculation)
           dynamics--; // a dying cell is a transition
         }
+        else {
+          population++; // lives on, counts for population
+        }
         // - Any live cell with two or three live neighbours lives on to the next generation.
       }
       // rule for dead cells:
@@ -197,11 +206,11 @@ int LifePage::calculateGeneration()
         if (nn==3) {
           cells[ci] = 3; // spawned
           dynamics++; // a new cell is a transition
+          population++; // now lives, counts for population
         }
       }
     }
   }
-  return dynamics;
 }
 
 

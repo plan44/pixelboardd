@@ -40,6 +40,9 @@ namespace p44 {
 
     long generationTicket;
 
+    int dynamics;
+    int population;
+
     int staticcount;
 
   public :
@@ -86,7 +89,7 @@ namespace p44 {
     void timeNext();
     void revive();
     int cellindex(int aX, int aY, bool aWrap);
-    int calculateGeneration();
+    void calculateGeneration();
     void createRandomCells(int aMinCells, int aMaxCells);
     void placePattern(uint16_t aPatternNo, bool aWrap=true, int aCenterX=-1, int aCenterY=-1, int aOrientation=-1);
   };
