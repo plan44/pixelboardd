@@ -324,7 +324,7 @@ PixelColor LifePage::colorAt(int aX, int aY)
       pix.r = (55-age)*4; // remove rest of red over next 32 cycles
     }
     else {
-      pix.b = 255; // stone age
+      pix.b = 192; // stone age
     }
   }
   return pix;
