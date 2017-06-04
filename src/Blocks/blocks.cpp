@@ -396,7 +396,7 @@ PixelColor BlocksPage::colorAt(int aX, int aY)
   pix.r = cdef->r;
   pix.g = cdef->g;
   pix.b = cdef->b;
-  if (gameState==game_over) {
+  if (gameState==game_over || gameState==game_ready) {
     pix = dimPixel(pix, 128);
     // overlay text
     PixelColor ovl = scoretext->colorAt(aX, aY);
