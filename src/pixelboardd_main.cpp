@@ -39,7 +39,6 @@ using namespace p44;
 
 typedef std::map<string, PixelPagePtr> PagesMap;
 
-/// Main program for plan44.ch P44-DSB-DEH in form of the "vdcd" daemon)
 class PixelBoardD : public CmdLineApp
 {
   typedef CmdLineApp inherited;
@@ -113,6 +112,7 @@ public:
       { 'l', "loglevel",       true,  "level;set max level of log message detail to show on stdout" },
       { 0  , "errlevel",       true,  "level;set max level for log messages to go to stderr as well" },
       { 0  , "dontlogerrors",  false, "don't duplicate error messages (see --errlevel) on stdout" },
+      { 0  , "deltatstamps",   false, "show timestamp delta between log lines" },
       { 'h', "help",           false, "show this text" },
       { 0, NULL } // list terminator
     };
@@ -135,6 +135,7 @@ public:
       int errlevel = LOG_ERR; // testing by default only reports to stdout
       getIntOption("errlevel", errlevel);
       SETERRLEVEL(errlevel, !getOption("dontlogerrors"));
+      SETDELTATIME(getOption("deltatstamps"));
 
       // create the LED chain
       upsideDown = getOption("upsidedown");
