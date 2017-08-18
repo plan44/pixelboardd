@@ -63,6 +63,8 @@ pixelboardd_SOURCES = \
   src/p44utils/gpio.cpp \
   src/p44utils/gpio.h \
   src/p44utils/gpio.hpp \
+  src/p44utils/pwm.cpp \
+  src/p44utils/pwm.hpp \
   src/p44utils/httpcomm.cpp\
   src/p44utils/httpcomm.hpp\
   src/p44utils/i2c.cpp \

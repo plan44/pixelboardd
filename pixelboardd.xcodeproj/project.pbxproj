@@ -134,6 +134,7 @@
 		ED8E64651DFDC66F00B66723 /* blocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = blocks.hpp; sourceTree = "<group>"; };
 		EDA21EDF1E0EC201009E276B /* display.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = display.hpp; sourceTree = "<group>"; };
 		EDA21EE01E0EC201009E276B /* display.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = display.cpp; sourceTree = "<group>"; };
+		EDF2EA731F473A67008D1DBC /* Makefile.am */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +170,7 @@
 		ED5372531DFC28D00066FF5A = {
 			isa = PBXGroup;
 			children = (
+				EDF2EA731F473A67008D1DBC /* Makefile.am */,
 				ED53725E1DFC28D00066FF5A /* src */,
 				ED53725D1DFC28D00066FF5A /* Products */,
 				ED5372D81DFCA0CB0066FF5A /* Frameworks */,
