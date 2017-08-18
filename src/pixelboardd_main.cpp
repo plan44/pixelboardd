@@ -33,7 +33,6 @@
 
 using namespace p44;
 
-#define MAINLOOP_CYCLE_TIME_uS 10000 // 10mS
 #define DEFAULT_LOGLEVEL LOG_NOTICE
 
 
@@ -280,7 +279,7 @@ public:
     srand((unsigned)MainLoop::currentMainLoop().now()*4223);
     display->begin();
     display->show();
-    MainLoop::currentMainLoop().registerIdleHandler(this, boost::bind(&PixelBoardD::step, this));
+    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::step, this, _1));
     MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::gotoPage, this, defaultPageName, defaultMode), 2*Second);
   }
 
@@ -504,7 +503,7 @@ public:
 
 
 
-  bool step()
+  void step(MLTimer &aTimer)
   {
     bool completed = true;
     if (currentPage) {
@@ -512,7 +511,7 @@ public:
     }
     checkInputs();
     updateDisplay();
-    return completed;
+    MainLoop::currentMainLoop().retriggerTimer(aTimer, 10*MilliSecond);
   }
 
 
@@ -551,8 +550,6 @@ int main(int argc, char **argv)
   // prevent debug output before application.main scans command line
   SETLOGLEVEL(LOG_EMERG);
   SETERRLEVEL(LOG_EMERG, false); // messages, if any, go to stderr
-  // create the mainloop
-  MainLoop::currentMainLoop().setLoopCycleTime(MAINLOOP_CYCLE_TIME_uS);
   // create app with current mainloop
   static PixelBoardD application;
   // pass control
