@@ -33,7 +33,7 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
   lastMessageShow(Never)
 {
   clear();
-  message = TextViewPtr(new TextView(7, 0, 20, 1));
+  message = TextViewPtr(new TextView(2, 0, 20, View::down));
 }
 
 

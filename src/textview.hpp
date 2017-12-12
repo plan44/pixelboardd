@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2016 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2016-2017 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
 //
@@ -24,19 +24,13 @@
 
 #include "p44utils_common.hpp"
 
-#include "pixelpage.hpp"
+#include "view.hpp"
 
 namespace p44 {
 
-  class TextView : public P44Obj
+  class TextView : public View
   {
-
-    bool dirty;
-
-    int originX;
-    int originY;
-    int width;
-    int direction;
+    typedef View inherited;
 
     // text parameters
     bool scrolling; // set if text should scroll
@@ -59,7 +53,7 @@ namespace p44 {
 
   public :
 
-    TextView(int aOriginX, int aOriginY, int aWidth, int aDirection=0);
+    TextView(int aOriginX, int aOriginY, int aWidth, int aOrientation=View::right);
 
     virtual ~TextView();
 
@@ -68,16 +62,8 @@ namespace p44 {
     /// @note this is called on the active page at least once per mainloop cycle
     virtual bool step();
 
-    /// return if anything changed on the display since last call
-    bool isDirty() { return dirty; };
-
-    /// call when display is updated
-    void updated() { dirty = false; };
-
-    /// get color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    virtual PixelColor colorAt(int aX, int aY);
+    /// get content color at X,Y
+    virtual PixelColor contentColorAt(int aX, int aY);
 
     /// set new text
     void setText(const string aText, bool aScrolling = true);
@@ -89,8 +75,6 @@ namespace p44 {
   protected:
 
     void init();
-
-    void makeDirty() { dirty = true; };
 
   private:
 

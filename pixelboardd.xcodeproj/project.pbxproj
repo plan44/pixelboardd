@@ -41,6 +41,7 @@
 		ED5372D71DFC9FC90066FF5A /* sqlite3pp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372C91DFC9F650066FF5A /* sqlite3pp.cpp */; };
 		ED5372DA1DFCA0CC0066FF5A /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ED5372D91DFCA0CC0066FF5A /* libsqlite3.tbd */; };
 		ED5372DD1DFCA1FF0066FF5A /* ledchaincomm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372DB1DFCA1FF0066FF5A /* ledchaincomm.cpp */; };
+		ED67E7EB1FE02EBD00B69250 /* view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED67E7E91FE02EBC00B69250 /* view.cpp */; };
 		ED8E64661DFDC66F00B66723 /* blocks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED8E64641DFDC66F00B66723 /* blocks.cpp */; };
 		EDA21EE11E0EC201009E276B /* display.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDA21EE01E0EC201009E276B /* display.cpp */; };
 /* End PBXBuildFile section */
@@ -130,6 +131,8 @@
 		ED5372D91DFCA0CC0066FF5A /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		ED5372DB1DFCA1FF0066FF5A /* ledchaincomm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ledchaincomm.cpp; sourceTree = "<group>"; };
 		ED5372DC1DFCA1FF0066FF5A /* ledchaincomm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ledchaincomm.hpp; sourceTree = "<group>"; };
+		ED67E7E91FE02EBC00B69250 /* view.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = view.cpp; sourceTree = "<group>"; };
+		ED67E7EA1FE02EBD00B69250 /* view.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = view.hpp; sourceTree = "<group>"; };
 		ED8E64641DFDC66F00B66723 /* blocks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blocks.cpp; sourceTree = "<group>"; };
 		ED8E64651DFDC66F00B66723 /* blocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = blocks.hpp; sourceTree = "<group>"; };
 		EDA21EDF1E0EC201009E276B /* display.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = display.hpp; sourceTree = "<group>"; };
@@ -193,6 +196,8 @@
 				ED8E64631DFDC62A00B66723 /* Blocks */,
 				ED23829F1E12B4AF00F1FE4F /* Torch */,
 				ED8E64621DFDC61800B66723 /* Display */,
+				ED67E7E91FE02EBC00B69250 /* view.cpp */,
+				ED67E7EA1FE02EBD00B69250 /* view.hpp */,
 				ED2382A31E140D4A00F1FE4F /* textview.cpp */,
 				ED2382A41E140D4A00F1FE4F /* textview.hpp */,
 				ED23829B1E117BD000F1FE4F /* pixelpage.cpp */,
@@ -397,6 +402,7 @@
 				ED5372B11DFC2CBE0066FF5A /* spi.cpp in Sources */,
 				EDA21EE11E0EC201009E276B /* display.cpp in Sources */,
 				ED23829E1E1190F500F1FE4F /* pixelpage.cpp in Sources */,
+				ED67E7EB1FE02EBD00B69250 /* view.cpp in Sources */,
 				ED5372AD1DFC2CBE0066FF5A /* persistentparams.cpp in Sources */,
 				ED5372A71DFC2CBE0066FF5A /* jsonrpccomm.cpp in Sources */,
 				ED5372A21DFC2CBE0066FF5A /* httpcomm.cpp in Sources */,

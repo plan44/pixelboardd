@@ -140,7 +140,7 @@ public:
       upsideDown = getOption("upsidedown");
       string leddev = "/tmp/ledchainsim";
       getStringOption("ledchain", leddev);
-      display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 20, upsideDown, true, true, upsideDown));
+      display = LEDChainCommPtr(new LEDChainComm(LEDChainComm::ledtype_ws281x, leddev, 200, 20, upsideDown, true, true, !upsideDown));
 
       // - start API server and wait for things to happen
       string apiport;

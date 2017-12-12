@@ -369,7 +369,7 @@ bool LifePage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentP
       if (aNewPressedKeys & keycode_left)
         placePattern(2); // beacon
       else if (aNewPressedKeys & keycode_middleleft)
-        placePattern(3, false, 5, 10, 0); // pentadecathlon centered
+        placePattern(3, false, 5, 9, 0); // pentadecathlon centered
       else if (aNewPressedKeys & keycode_middleright)
         placePattern(7); // glider
       else if (aNewPressedKeys & keycode_right)

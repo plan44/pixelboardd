@@ -23,67 +23,6 @@
 
 using namespace p44;
 
-// MARK: ===== Utilities
-
-uint8_t p44::dimVal(uint8_t aVal, uint8_t aDim)
-{
-  return ((uint16_t)aVal*(aDim+1))>>8;
-}
-
-
-PixelColor p44::dimPixel(const PixelColor aPix, uint8_t aDim)
-{
-  PixelColor pix;
-  pix.r = dimVal(aPix.r, aDim);
-  pix.g = dimVal(aPix.g, aDim);
-  pix.b = dimVal(aPix.b, aDim);
-  pix.a = aPix.a;
-  return pix;
-}
-
-
-void p44::reduce(uint8_t &aByte, uint8_t aAmount, uint8_t aMin)
-{
-  int r = aByte-aAmount;
-  if (r<aMin)
-    aByte = aMin;
-  else
-    aByte = (uint8_t)r;
-}
-
-
-void p44::increase(uint8_t &aByte, uint8_t aAmount, uint8_t aMax)
-{
-  int r = aByte+aAmount;
-  if (r>aMax)
-    aByte = aMax;
-  else
-    aByte = (uint8_t)r;
-}
-
-
-void p44::overlayPixel(PixelColor &aPixel, PixelColor aOverlay)
-{
-  if (aOverlay.a==255) {
-    aPixel = aOverlay;
-  }
-  else {
-    // mix in
-    // - reduce original by alpha of overlay
-    aPixel = dimPixel(aPixel, 255-aOverlay.a);
-    // - reduce overlay by its own alpha
-    aOverlay = dimPixel(aOverlay, aOverlay.a);
-    // - add in
-    aPixel.r += aOverlay.r;
-    aPixel.g += aOverlay.g;
-    aPixel.b += aOverlay.b;
-  }
-  aPixel.a = 255; // result is never transparent
-}
-
-
-
-
 
 // MARK: ===== PixelPage
 

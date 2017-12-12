@@ -238,7 +238,7 @@ bool Block::position(int aX, int aY, int aOrientation, bool aOpenAtBottom)
 
 bool Block::move(int aDx, int aDy, int aRot, bool aOpenAtBottom)
 {
-  int o = (orientation + aRot) % 4;
+  int o = (orientation + aRot) & 0x3;
   int nx = x+aDx;
   int ny = y+aDy;
   return position(nx, ny, o, aOpenAtBottom);
@@ -262,7 +262,7 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   stateChangeTicket(0)
 {
   stop();
-  scoretext = TextViewPtr(new TextView(7, 0, 20, 1));
+  scoretext = TextViewPtr(new TextView(2, 0, 20, View::down));
   scoretext->setTextColor({255, 128, 0, 255});
 }
 
@@ -484,13 +484,13 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
       movement = 1;
     }
     else if (aNewPressedKeys & keycode_middleleft) {
-      rotation = 1;
+      rotation = -1;
     }
     else if (aNewPressedKeys & keycode_middleright) {
       drop = true;
     }
     // movement X is right edge, so need to swap for bottom end keys
-    if (aSide==0) movement = -movement;
+    if (aSide==1) movement = -movement;
     if (movement!=0 || rotation!=0) {
       moveBlock(movement, rotation, aSide==1);
     }

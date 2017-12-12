@@ -143,12 +143,12 @@ static const glyph_t fontGlyphs[numGlyphs] = {
   { 4, "\x04\x02\x04\x08" },      // ~ 0x7E (14)
   { 5, "\x7F\x41\x41\x41\x7F" },  //   0x7F (15)
 
-  { 5, "\x7D\x0a\x09\x0a\x7D" },  // Ä 0x41 (1)
-  { 5, "\x3F\x41\x41\x41\x3F" },  // Ö 0x4F (15)
-  { 5, "\x3D\x40\x40\x40\x3D" },  // Ü 0x55 (5)
-  { 5, "\x20\x55\x54\x55\x78" },  // ä 0x61 (1)
-  { 5, "\x38\x45\x44\x45\x38" },  // ö 0x6F (15)
-  { 5, "\x3c\x41\x40\x41\x7c" },  // ü 0x75 (5)
+  { 5, "\x7D\x0a\x09\x0a\x7D" },  // Ä 0x80 (0)
+  { 5, "\x3F\x41\x41\x41\x3F" },  // Ö 0x81 (1)
+  { 5, "\x3D\x40\x40\x40\x3D" },  // Ü 0x82 (2)
+  { 5, "\x20\x55\x54\x55\x78" },  // ä 0x83 (3)
+  { 5, "\x38\x45\x44\x45\x38" },  // ö 0x84 (4)
+  { 5, "\x3c\x41\x40\x41\x7c" },  // ü 0x85 (5)
 };
 
 
@@ -172,14 +172,19 @@ void updated() { dirty = false; };
 virtual PixelColor colorAt(int aX, int aY) = 0;
 */
 
-TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aDirection) :
-  originX(aOriginX),
-  originY(aOriginY),
-  width(aWidth),
-  direction(aDirection),
+TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aOrientation) :
   textPixels(NULL),
   lastTextStep(Never)
 {
+  // content
+  if (aOrientation & xy_swap) {
+    setFrame(aOriginX, aOriginY, rowsPerGlyph, aWidth);
+  }
+  else {
+    setFrame(aOriginX, aOriginY, aWidth, rowsPerGlyph);
+  }
+  setContentSize(aWidth, rowsPerGlyph);
+  setOrientation(aOrientation);
   init();
   textColor.r = 42;
   textColor.g = 42;
@@ -197,7 +202,7 @@ TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aDirection) :
 void TextView::init()
 {
   if (textPixels) delete[] textPixels;
-  textPixels = new uint8_t[width*rowsPerGlyph];
+  textPixels = new uint8_t[contentSizeX*rowsPerGlyph];
 }
 
 
@@ -265,7 +270,7 @@ void TextView::setText(const string aText, bool aScrolling)
   repeatCount = 0;
   if (scrolling) {
     // let it scroll in from the right
-    textPixelOffset = -width;
+    textPixelOffset = -contentSizeX;
   }
   else {
     // just appears at origin
@@ -292,7 +297,7 @@ bool TextView::step()
       nextBright = 0;
     }
     // generate vertical rows
-    int activeCols = width;
+    int activeCols = contentSizeX;
     // calculate text length in pixels
     int totalTextPixels = 0;
     int textLen = (int)text.length();
@@ -300,7 +305,7 @@ bool TextView::step()
       // sum up width of individual chars
       totalTextPixels += fontGlyphs[glyphIndexForChar(text[i])].width + glyphSpacing;
     }
-    for (int x=0; x<width; x++) {
+    for (int x=0; x<contentSizeX; x++) {
       uint8_t column = 0;
       // determine font column
       if (x<activeCols) {
@@ -334,14 +339,8 @@ bool TextView::step()
       for (int glyphRow=0; glyphRow<rowsPerGlyph; glyphRow++) {
         int i;
         int leftstep;
-        if (mirrorText) {
-          i = (glyphRow+1)*width - 1 - x; // LED index, x-direction mirrored
-          leftstep = 1;
-        }
-        else {
-          i = glyphRow*width + x; // LED index
-          leftstep = -1;
-        }
+        i = glyphRow*contentSizeX + x; // LED index
+        leftstep = -1;
         if (glyphRow < rowsPerGlyph) {
           if (column & (0x40>>glyphRow)) {
             textPixels[i] = thisBright;
@@ -370,14 +369,14 @@ bool TextView::step()
           }
           else {
             // show again
-            textPixelOffset = -width;
+            textPixelOffset = -contentSizeX;
             textCycleCount = 0;
           }
         }
       }
     }
     else {
-      if (textCycleCount>=cycles_per_px*width) {
+      if (textCycleCount>=cycles_per_px*contentSizeX) {
         repeatCount++;
         if (text_repeats!=0 && repeatCount>=text_repeats) {
           // done
@@ -390,27 +389,15 @@ bool TextView::step()
 }
 
 
-PixelColor TextView::colorAt(int aX, int aY)
+PixelColor TextView::contentColorAt(int aX, int aY)
 {
-  // relative to the origin
-  int x = aX-originX;
-  int y = aY-originY;
-  // rotate around origin
-  int tx,ty;
-  switch (direction) {
-    default: tx=x; ty=y; break;
-    case 1: tx=y; ty=-x; break;
-    case 2: tx=-x; ty=-y; break;
-    case 3: tx=-y; ty=x; break;
-  }
-  // now actually return pixel
-  PixelColor pc = textColor;
-  if (tx<0 || tx>=width || ty<0 || ty>=rowsPerGlyph) {
-    pc.a = 0; // transparent
+  if (aX<0 || aX>=contentSizeX || aY<0 || aY>=rowsPerGlyph) {
+    return inherited::contentColorAt(aX, aY);
   }
   else {
-    pc.a = textPixels[ty*width + (width-1-tx)]; // brightness of pixel
+    PixelColor pc = textColor;
+    pc.a = textPixels[aY*contentSizeX + aX]; // brightness of pixel
+    return pc;
   }
-  return pc;
 }
 

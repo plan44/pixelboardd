@@ -25,6 +25,8 @@
 #include "p44utils_common.hpp"
 #include "jsonobject.hpp"
 
+#include "view.hpp"
+
 namespace p44 {
 
   class PixelPage;
@@ -34,28 +36,12 @@ namespace p44 {
 
   #define PAGE_NUMPIXELS (PAGE_NUMCOLS*PAGE_NUMROWS)
 
-  typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a; // alpha
-  } PixelColor;
-
-
   enum {
     pagemode_controls1 = 0x01,
     pagemode_controls2 = 0x02,
     pagemode_startnow = 0x04
   } PageModeEnum;
   typedef uint8_t PageMode;
-
-  /// Utilities
-  uint8_t dimVal(uint8_t aVal, uint8_t aDim);
-  PixelColor dimPixel(const PixelColor aPix, uint8_t aDim);
-  void reduce(uint8_t &aByte, uint8_t aAmount, uint8_t aMin = 0);
-  void increase(uint8_t &aByte, uint8_t aAmount, uint8_t aMax = 255);
-  void overlayPixel(PixelColor &aPixel, PixelColor aOverlay);
-
 
   /// Is called from the page to deliver events to the application
   typedef boost::function<void (PixelPage &aPage, const string aInfo)> PixelPageInfoCB;
