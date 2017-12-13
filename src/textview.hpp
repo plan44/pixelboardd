@@ -57,24 +57,23 @@ namespace p44 {
 
     virtual ~TextView();
 
+    virtual void clear();
+
     /// calculate changes on the display, return true if any
     /// @return true if complete, false if step() would like to be called immediately again
     /// @note this is called on the active page at least once per mainloop cycle
     virtual bool step();
 
-    /// get content color at X,Y
-    virtual PixelColor contentColorAt(int aX, int aY);
-
     /// set new text
     void setText(const string aText, bool aScrolling = true);
 
     /// set new text color
-    void setTextColor(PixelColor aPixelColor) { textColor = aPixelColor; };
-
+    void setTextColor(PixelColor aTextColor);
 
   protected:
 
-    void init();
+    /// get content color at X,Y
+    virtual PixelColor contentColorAt(int aX, int aY);
 
   private:
 

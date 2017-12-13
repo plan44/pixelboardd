@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2016 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2016-2017 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
 //
@@ -29,11 +29,15 @@ using namespace p44;
 
 DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
   inherited("display", aInfoCallback),
-  pngBuffer(NULL),
   lastMessageShow(Never)
 {
   clear();
   message = TextViewPtr(new TextView(2, 0, 20, View::down));
+  bgimage = ImageViewPtr(new ImageView());
+  bgimage->setFrame(0, 0, PAGE_NUMCOLS, PAGE_NUMROWS);
+  stack = ViewStackPtr(new ViewStack());
+  stack->pushView(bgimage);
+  stack->pushView(message);
 }
 
 
@@ -57,8 +61,8 @@ bool DisplayPage::step()
       showMessage(defaultMessage);
     }
     message->step();
-    if (message->isDirty()) makeDirty();
   }
+  if (stack->isDirty()) makeDirty();
   return true;
 }
 
@@ -66,42 +70,24 @@ bool DisplayPage::step()
 
 void DisplayPage::clear()
 {
-  for (int i=0; i<PAGE_NUMPIXELS; ++i) {
-    pixels[i].r = 0;
-    pixels[i].g = 0;
-    pixels[i].b = 0;
-    pixels[i].a = 0;
-  }
-  // init libpng image structure
-  memset(&pngImage, 0, (sizeof pngImage));
-  pngImage.version = PNG_IMAGE_VERSION;
-  // free the buffer if allocated
-  if (pngBuffer) {
-    free(pngBuffer);
-    pngBuffer = NULL;
-  }
+  if (message) message->clear();
+  if (bgimage) bgimage->clear();
 }
 
 
 PixelColor DisplayPage::colorAt(int aX, int aY)
 {
-  PixelColor pix = bgColorAt(aX, aY);
-  PixelColor ovl = pixels[aY*PAGE_NUMCOLS+aX];
-  overlayPixel(pix, ovl);
-  if (message) {
-    ovl = message->colorAt(aX, aY);
-    overlayPixel(pix, ovl);
-  }
-  return pix;
+  return stack->colorAt(aX, aY);
+//  PixelColor pix = black;
+//  if (bgimage) {
+//    pix = bgimage->colorAt(aX, aY);
+//  }
+//  if (message) {
+//    PixelColor ovl = message->colorAt(aX, aY);
+//    overlayPixel(pix, ovl);
+//  }
+//  return pix;
 }
-
-
-void DisplayPage::setColorAt(int aX, int aY, uint8_t r, uint8_t g, uint8_t b)
-{
-  if (!isWithin(aX, aY)) return;
-  pixels[aY*PAGE_NUMCOLS+aX] = { r, g, b, 255 };
-}
-
 
 
 
@@ -168,70 +154,5 @@ bool DisplayPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurre
 
 ErrorPtr DisplayPage::loadPNGBackground(const string aPNGFileName)
 {
-  // clear any previous pattern
-  clear();
-  // read image
-  if (png_image_begin_read_from_file(&pngImage, aPNGFileName.c_str()) == 0) {
-    // error
-    return TextError::err("could not open PNG file %s", aPNGFileName.c_str());
-  }
-  else {
-    // We only need the luminance
-    pngImage.format = PNG_FORMAT_RGBA;
-    // Now allocate enough memory to hold the image in this format; the
-    // PNG_IMAGE_SIZE macro uses the information about the image (width,
-    // height and format) stored in 'image'.
-    pngBuffer = (png_bytep)malloc(PNG_IMAGE_SIZE(pngImage));
-    LOG(LOG_INFO, "Image size in bytes = %d\n", PNG_IMAGE_SIZE(pngImage));
-    LOG(LOG_INFO, "Image width = %d\n", pngImage.width);
-    LOG(LOG_INFO, "Image height = %d\n", pngImage.height);
-    LOG(LOG_INFO, "Image width*height = %d\n", pngImage.height*pngImage.width);
-    if (pngBuffer==NULL) {
-      return TextError::err("Could not allocate buffer for reading PNG file %s", aPNGFileName.c_str());
-    }
-    // now actually red the image
-    if (png_image_finish_read(
-      &pngImage,
-      NULL, // background
-      pngBuffer,
-      0, // row_stride
-      NULL //colormap
-    ) == 0) {
-      // error
-      ErrorPtr err = TextError::err("Error reading PNG file %s: error: %s", aPNGFileName.c_str(), pngImage.message);
-      clear(); // clear only after pngImage.message has been used
-      return err;
-    }
-  }
-  // image read ok
-  makeDirty();
-  return ErrorPtr();
+  return bgimage->loadPNG(aPNGFileName);
 }
-
-
-PixelColor DisplayPage::bgColorAt(int aX, int aY)
-{
-  // FIXME
-  aY = 19-aY;
-
-  PixelColor p;
-  if (
-    pngBuffer == NULL ||
-    aX<0 || aX>=pngImage.width ||
-    aY<0 || aY>=pngImage.height
-  ) {
-    p.r = 0;
-    p.g = 0;
-    p.b = 0;
-    p.a = 0;
-    return p; // black
-  }
-  // get pixel infomration
-  uint8_t *pix = pngBuffer+(aY*pngImage.width+aX)*4;
-  p.r = *pix++;
-  p.g = *pix++;
-  p.b = *pix++;
-  p.a = *pix++;
-  return p;
-}
-

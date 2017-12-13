@@ -124,10 +124,14 @@ pixelboardd_SOURCES = \
   src/Display/display.hpp \
   src/Torch/torch.cpp \
   src/Torch/torch.hpp \
+  src/viewstack.cpp \
+  src/viewstack.hpp \
   src/view.cpp \
   src/view.hpp \
   src/textview.cpp \
   src/textview.hpp \
+  src/imageview.cpp \
+  src/imageview.hpp \
   src/pixelpage.cpp \
   src/pixelpage.hpp \
   src/pixelboardd_main.cpp

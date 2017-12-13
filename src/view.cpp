@@ -23,7 +23,6 @@
 
 using namespace p44;
 
-
 // MARK: ===== View
 
 View::View()
@@ -43,6 +42,13 @@ View::View()
 
 View::~View()
 {
+  clear();
+}
+
+
+void View::clear()
+{
+  setContentSize(0, 0);
 }
 
 
@@ -53,11 +59,6 @@ void View::setFrame(int aOriginX, int aOriginY, int aSizeX, int aSizeY)
   dX = aSizeX,
   dY = aSizeY;
   makeDirty();
-}
-
-
-void View::init()
-{
 }
 
 
@@ -73,37 +74,46 @@ PixelColor View::colorAt(int aX, int aY)
 {
   // default is background color
   PixelColor pc = backgroundColor;
-  // calculate coordinate relative to the content's origin
-  int x = aX-originX-offsetX;
-  int y = aY-originY-offsetY;
-  // translate into content coordinates
-  if (contentOrientation & xy_swap) {
-    swap(x, y);
+  if (alpha==0) {
+    pc.a = 0; // entire view is invisible
   }
-  if (contentOrientation & x_flip) {
-    x = contentSizeX-x-1;
-  }
-  if (contentOrientation & y_flip) {
-    y = contentSizeY-y-1;
-  }
-  // NOT limited to content size, content must restrict this!
-  pc = contentColorAt(x, y);
-  #if SHOW_ORIGIN
-  if (x==0 && y==0) {
-    return { .r=255, .g=0, .b=0, .a=255 };
-  }
-  else if (x==1 && y==0) {
-    return { .r=0, .g=255, .b=0, .a=255 };
-  }
-  else if (x==0 && y==1) {
-    return { .r=0, .g=0, .b=255, .a=255 };
-  }
-  #endif
-  if (pc.a==0) {
-    // background is where content is fully transparent
-    pc = backgroundColor;
-    // Note: view background does NOT shine through semi-transparent content pixels!
-    //   But non-transparent content pixels directly are view pixels!
+  else {
+    // calculate coordinate relative to the content's origin
+    int x = aX-originX-offsetX;
+    int y = aY-originY-offsetY;
+    // translate into content coordinates
+    if (contentOrientation & xy_swap) {
+      swap(x, y);
+    }
+    if (contentOrientation & x_flip) {
+      x = contentSizeX-x-1;
+    }
+    if (contentOrientation & y_flip) {
+      y = contentSizeY-y-1;
+    }
+    // NOT limited to content size, content must restrict this!
+    pc = contentColorAt(x, y);
+    #if SHOW_ORIGIN
+    if (x==0 && y==0) {
+      return { .r=255, .g=0, .b=0, .a=255 };
+    }
+    else if (x==1 && y==0) {
+      return { .r=0, .g=255, .b=0, .a=255 };
+    }
+    else if (x==0 && y==1) {
+      return { .r=0, .g=0, .b=255, .a=255 };
+    }
+    #endif
+    if (pc.a==0) {
+      // background is where content is fully transparent
+      pc = backgroundColor;
+      // Note: view background does NOT shine through semi-transparent content pixels!
+      //   But non-transparent content pixels directly are view pixels!
+    }
+    // factor in layer alpha
+    if (alpha!=255) {
+      pc.a = dimVal(pc.a, alpha);
+    }
   }
   return pc;
 }
@@ -160,13 +170,18 @@ void p44::overlayPixel(PixelColor &aPixel, PixelColor aOverlay)
     // - reduce overlay by its own alpha
     aOverlay = dimPixel(aOverlay, aOverlay.a);
     // - add in
-    aPixel.r += aOverlay.r;
-    aPixel.g += aOverlay.g;
-    aPixel.b += aOverlay.b;
+    addToPixel(aPixel, aOverlay);
   }
   aPixel.a = 255; // result is never transparent
 }
 
+
+void p44::addToPixel(PixelColor &aPixel, PixelColor aIncrease)
+{
+  aPixel.r += aIncrease.r;
+  aPixel.g += aIncrease.g;
+  aPixel.b += aIncrease.b;
+}
 
 
 

@@ -34,29 +34,22 @@ namespace p44 {
     uint8_t a; // alpha
   } PixelColor;
 
+  const PixelColor transparent = { .r=0, .g=0, .b=0, .a=0 };
+  const PixelColor black = { .r=0, .g=0, .b=0, .a=255 };
+
   /// Utilities
   uint8_t dimVal(uint8_t aVal, uint8_t aDim);
   PixelColor dimPixel(const PixelColor aPix, uint8_t aDim);
   void reduce(uint8_t &aByte, uint8_t aAmount, uint8_t aMin = 0);
   void increase(uint8_t &aByte, uint8_t aAmount, uint8_t aMax = 255);
+  void addToPixel(PixelColor &aPixel, PixelColor aIncrease);
   void overlayPixel(PixelColor &aPixel, PixelColor aOverlay);
 
   class View : public P44Obj
   {
+    friend class ViewStack;
 
     bool dirty;
-
-    // outer frame
-    int originX;
-    int originY;
-    int dX;
-    int dY;
-
-    // alpha (opacity)
-    uint8_t alpha;
-
-    // background
-    PixelColor backgroundColor;
 
   public:
 
@@ -76,6 +69,18 @@ namespace p44 {
 
   protected:
 
+    // outer frame
+    int originX;
+    int originY;
+    int dX;
+    int dY;
+
+    // alpha (opacity)
+    uint8_t alpha;
+
+    // background
+    PixelColor backgroundColor;
+
     // content
     int offsetX; ///< content X offset (in view coordinates)
     int offsetY; ///< content Y offset (in view coordinates)
@@ -90,9 +95,6 @@ namespace p44 {
     ///   implementation must check this!
     virtual PixelColor contentColorAt(int aX, int aY) { return backgroundColor; }
 
-    /// initialize for use
-    void init();
-
     /// set dirty - to be called by step() implementation when the view needs to be redisplayed
     void makeDirty() { dirty = true; };
 
@@ -102,6 +104,9 @@ namespace p44 {
     View();
 
     virtual ~View();
+
+    /// clear contents of this view
+    virtual void clear();
 
     /// set the frame within the board coordinate system
     /// @param aOriginX origin X on pixelboard
@@ -125,17 +130,16 @@ namespace p44 {
     /// set content size
     void setContentSize(int aSizeX, int aSizeY) { contentSizeX = aSizeX; contentSizeY = aSizeY; makeDirty(); };
 
-
     /// calculate changes on the display, return true if any
     /// @return true if complete, false if step() would like to be called immediately again
     /// @note this is called on the active page at least once per mainloop cycle
-    virtual bool step() = 0;
+    virtual bool step();
 
     /// return if anything changed on the display since last call
-    bool isDirty() { return dirty; };
+    virtual bool isDirty() { return dirty; };
 
     /// call when display is updated
-    void updated() { dirty = false; };
+    virtual void updated() { dirty = false; };
 
     /// get color at X,Y
     /// @param aX PlayField X coordinate

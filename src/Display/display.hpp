@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2016 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2016-2017 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
 //
@@ -24,8 +24,9 @@
 
 #include "pixelpage.hpp"
 #include "textview.hpp"
+#include "imageview.hpp"
+#include "viewstack.hpp"
 
-#include <png.h>
 
 namespace p44 {
 
@@ -34,12 +35,9 @@ namespace p44 {
   {
     typedef PixelPage inherited;
 
-    PixelColor pixels[PAGE_NUMPIXELS]; ///< internal representation
-
-    png_image pngImage; /// The control structure used by libpng
-    png_bytep pngBuffer; /// byte buffer
-
     TextViewPtr message;
+    ImageViewPtr bgimage;
+    ViewStackPtr stack;
     string defaultMessage;
     MLMicroSeconds lastMessageShow;
     MLMicroSeconds autoMessageTimeout = 3*Minute;
@@ -64,11 +62,6 @@ namespace p44 {
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
     virtual PixelColor colorAt(int aX, int aY) P44_OVERRIDE;
-
-    /// set color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    void setColorAt(int aX, int aY, uint8_t r, uint8_t g, uint8_t b);
 
     /// show PNG on DisplayPage
     ErrorPtr loadPNGBackground(const string aPNGFileName);

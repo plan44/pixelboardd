@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2016 plan44.ch / Lukas Zeller, Zurich, Switzerland
+//  Copyright (c) 2016-2017 plan44.ch / Lukas Zeller, Zurich, Switzerland
 //
 //  Author: Lukas Zeller <luz@plan44.ch>
 //
@@ -185,7 +185,7 @@ TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aOrientation) :
   }
   setContentSize(aWidth, rowsPerGlyph);
   setOrientation(aOrientation);
-  init();
+  textPixels = new uint8_t[contentSizeX*rowsPerGlyph];
   textColor.r = 42;
   textColor.g = 42;
   textColor.b = 42;
@@ -199,10 +199,9 @@ TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aOrientation) :
 }
 
 
-void TextView::init()
+void TextView::clear()
 {
-  if (textPixels) delete[] textPixels;
-  textPixels = new uint8_t[contentSizeX*rowsPerGlyph];
+  setText("", false);
 }
 
 
@@ -233,7 +232,7 @@ static inline int glyphIndexForChar(const char aChar)
 
 void TextView::setText(const string aText, bool aScrolling)
 {
-  // URL decode
+  // decode some UTF-8 chars
   text = "";
   int i = 0;
   char c;
@@ -278,6 +277,12 @@ void TextView::setText(const string aText, bool aScrolling)
   }
 }
 
+
+void TextView::setTextColor(PixelColor aTextColor)
+{
+  textColor = aTextColor; // alpha of textColor is not used
+  setAlpha(aTextColor.a); // put it into overall layer alpha instead
+}
 
 
 bool TextView::step()
@@ -385,7 +390,7 @@ bool TextView::step()
       }
     }
   }
-  return true; // completed
+  return inherited::step(); // completed myself, let inherited process rest
 }
 
 
