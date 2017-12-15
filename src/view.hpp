@@ -136,6 +136,10 @@ namespace p44 {
     /// @param aCompletedCB is called when fade is complete
     void fadeTo(int aAlpha, MLMicroSeconds aWithIn, SimpleCB aCompletedCB = NULL);
 
+    /// stop ongoing fading
+    /// @note: completed callback will not be called
+    void stopFading();
+
     /// @param aOrientation the orientation of the content
     void setOrientation(Orientation aOrientation) { contentOrientation = aOrientation; makeDirty(); }
 
@@ -159,7 +163,7 @@ namespace p44 {
     /// get color at X,Y
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
-    PixelColor colorAt(int aX, int aY);
+    virtual PixelColor colorAt(int aX, int aY);
 
   };
   typedef boost::intrusive_ptr<View> ViewPtr;

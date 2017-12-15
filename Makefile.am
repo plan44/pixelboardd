@@ -126,6 +126,8 @@ pixelboardd_SOURCES = \
   src/Torch/torch.hpp \
   src/viewstack.cpp \
   src/viewstack.hpp \
+  src/viewanimator.cpp \
+  src/viewanimator.hpp \
   src/view.cpp \
   src/view.hpp \
   src/textview.cpp \

@@ -43,8 +43,16 @@ PixelPage::~PixelPage()
 
 bool PixelPage::step()
 {
-  // dummy in base class
+  // step the view, if any
+  if (view) return view->step();
   return true; // everything done
+}
+
+
+PixelColor PixelPage::colorAt(int aX, int aY)
+{
+  if (view) return view->colorAt(aX, aY);
+  return transparent;
 }
 
 
@@ -59,6 +67,28 @@ bool PixelPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrent
 bool PixelPage::handleRequest(JsonObjectPtr aRequest, RequestDoneCB aRequestDoneCB)
 {
   return false; // page does not handle the request
+}
+
+
+bool PixelPage::isDirty()
+{
+  if (dirty) return dirty;
+  if (view) return view->isDirty();
+  return false;
+};
+
+
+void PixelPage::updated()
+{
+  dirty = false;
+  if (view) view->updated();
+}
+
+
+void PixelPage::setView(ViewPtr aView)
+{
+  view = aView;
+  makeDirty(); // new view, must redisplay
 }
 
 

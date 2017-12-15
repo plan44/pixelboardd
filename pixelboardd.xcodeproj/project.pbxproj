@@ -44,6 +44,7 @@
 		ED67E7EB1FE02EBD00B69250 /* view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED67E7E91FE02EBC00B69250 /* view.cpp */; };
 		ED67E7EF1FE1770000B69250 /* imageview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED67E7ED1FE1770000B69250 /* imageview.cpp */; };
 		ED67E7F31FE18D0600B69250 /* viewstack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED67E7F01FE1773200B69250 /* viewstack.cpp */; };
+		ED67E7FB1FE41A8900B69250 /* viewanimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED67E7F81FE3FEB700B69250 /* viewanimator.cpp */; };
 		ED8E64661DFDC66F00B66723 /* blocks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED8E64641DFDC66F00B66723 /* blocks.cpp */; };
 		EDA21EE11E0EC201009E276B /* display.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDA21EE01E0EC201009E276B /* display.cpp */; };
 /* End PBXBuildFile section */
@@ -139,6 +140,8 @@
 		ED67E7EE1FE1770000B69250 /* imageview.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = imageview.hpp; sourceTree = "<group>"; };
 		ED67E7F01FE1773200B69250 /* viewstack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viewstack.cpp; sourceTree = "<group>"; };
 		ED67E7F11FE1773300B69250 /* viewstack.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = viewstack.hpp; sourceTree = "<group>"; };
+		ED67E7F81FE3FEB700B69250 /* viewanimator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viewanimator.cpp; sourceTree = "<group>"; };
+		ED67E7F91FE3FEB800B69250 /* viewanimator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = viewanimator.hpp; sourceTree = "<group>"; };
 		ED8E64641DFDC66F00B66723 /* blocks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blocks.cpp; sourceTree = "<group>"; };
 		ED8E64651DFDC66F00B66723 /* blocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = blocks.hpp; sourceTree = "<group>"; };
 		EDA21EDF1E0EC201009E276B /* display.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = display.hpp; sourceTree = "<group>"; };
@@ -210,6 +213,8 @@
 				ED2382A41E140D4A00F1FE4F /* textview.hpp */,
 				ED67E7F01FE1773200B69250 /* viewstack.cpp */,
 				ED67E7F11FE1773300B69250 /* viewstack.hpp */,
+				ED67E7F81FE3FEB700B69250 /* viewanimator.cpp */,
+				ED67E7F91FE3FEB800B69250 /* viewanimator.hpp */,
 				ED23829B1E117BD000F1FE4F /* pixelpage.cpp */,
 				ED23829C1E117BD000F1FE4F /* pixelpage.hpp */,
 				ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */,
@@ -416,6 +421,7 @@
 				ED5372AD1DFC2CBE0066FF5A /* persistentparams.cpp in Sources */,
 				ED5372A71DFC2CBE0066FF5A /* jsonrpccomm.cpp in Sources */,
 				ED67E7EF1FE1770000B69250 /* imageview.cpp in Sources */,
+				ED67E7FB1FE41A8900B69250 /* viewanimator.cpp in Sources */,
 				ED5372A21DFC2CBE0066FF5A /* httpcomm.cpp in Sources */,
 				ED5372AA1DFC2CBE0066FF5A /* mainloop.cpp in Sources */,
 				ED5372A51DFC2CBE0066FF5A /* jsoncomm.cpp in Sources */,

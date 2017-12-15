@@ -19,41 +19,66 @@
 //  along with pixelboardd. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __pixelboardd_viewstack_hpp__
-#define __pixelboardd_viewstack_hpp__
+#ifndef __pixelboardd_viewanimator_hpp__
+#define __pixelboardd_viewanimator_hpp__
 
 #include "view.hpp"
 
 namespace p44 {
 
-  class ViewStack : public View
+
+  class AnimationStep
+  {
+  public:
+    ViewPtr view;
+    MLMicroSeconds fadeInTime;
+    MLMicroSeconds showTime;
+    MLMicroSeconds fadeOutTime;
+  };
+
+
+  
+  class ViewAnimator : public View
   {
     typedef View inherited;
 
-    typedef std::list<ViewPtr> ViewsList;
+    typedef std::vector<AnimationStep> SequenceVector;
 
-    ViewsList viewStack;
+    SequenceVector sequence; ///< sequence
+    bool repeating; ///< set if current animation is repeating
+    int currentStep; ///< current step in running animation
+    SimpleCB completedCB; ///< called when one animation run is done
+    ViewPtr currentView; ///< current view
+
+    enum {
+      as_begin,
+      as_show,
+      as_fadeout
+    } animationState;
+    MLMicroSeconds lastStateChange;
 
   public :
 
     /// create view stack
-    ViewStack();
+    ViewAnimator();
 
-    virtual ~ViewStack();
+    virtual ~ViewAnimator();
 
-    /// clear stack, means remove all views
+    /// clear all steps
     virtual void clear();
 
     /// push view onto top of stack
     /// @param aView the view to push in front of all other views
-    void pushView(ViewPtr aView);
+    void pushStep(ViewPtr aView, MLMicroSeconds aShowTime, MLMicroSeconds aFadeInTime=0, MLMicroSeconds aFadeOutTime=0);
 
-    /// remove topmost view
-    void popView();
+    /// start animating
+    /// @param aRepeat if set, animation will repeat
+    /// @param aCompletedCB called when animation sequence ends (if repeating, it is called multiple times)
+    void startAnimation(bool aRepeat, SimpleCB aCompletedCB = NULL);
 
-    /// remove specific view
-    /// @param aView the view to remove from the stack
-    void removeView(ViewPtr aView);
+    /// stop animation
+    /// @note: completed callback will not be called
+    void stopAnimation();
 
 
     /// calculate changes on the display, return true if any
@@ -72,11 +97,15 @@ namespace p44 {
     /// @param aY PlayField Y coordinate
     virtual PixelColor colorAt(int aX, int aY);
 
+  private:
+
+    void stepAnimation();
+
   };
-  typedef boost::intrusive_ptr<ViewStack> ViewStackPtr;
+  typedef boost::intrusive_ptr<ViewAnimator> ViewAnimatorPtr;
 
 } // namespace p44
 
 
 
-#endif /* __pixelboardd_viewstack_hpp__ */
+#endif /* __pixelboardd_viewanimator_hpp__ */

@@ -35,9 +35,10 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
   message = TextViewPtr(new TextView(2, 0, 20, View::down));
   bgimage = ImageViewPtr(new ImageView());
   bgimage->setFrame(0, 0, PAGE_NUMCOLS, PAGE_NUMROWS);
-  stack = ViewStackPtr(new ViewStack());
+  ViewStackPtr stack = ViewStackPtr(new ViewStack());
   stack->pushView(bgimage);
   stack->pushView(message);
+  setView(stack);
 }
 
 
@@ -52,7 +53,6 @@ void DisplayPage::show(PageMode aMode)
 
 void DisplayPage::hide()
 {
-
 }
 
 
@@ -63,9 +63,7 @@ bool DisplayPage::step()
       showMessage(defaultMessage);
     }
   }
-  stack->step();
-  if (stack->isDirty()) makeDirty();
-  return true;
+  return inherited::step();
 }
 
 
@@ -75,22 +73,6 @@ void DisplayPage::clear()
   if (message) message->clear();
   if (bgimage) bgimage->clear();
 }
-
-
-PixelColor DisplayPage::colorAt(int aX, int aY)
-{
-  return stack->colorAt(aX, aY);
-//  PixelColor pix = black;
-//  if (bgimage) {
-//    pix = bgimage->colorAt(aX, aY);
-//  }
-//  if (message) {
-//    PixelColor ovl = message->colorAt(aX, aY);
-//    overlayPixel(pix, ovl);
-//  }
-//  return pix;
-}
-
 
 
 bool DisplayPage::handleRequest(JsonObjectPtr aRequest, RequestDoneCB aRequestDoneCB)

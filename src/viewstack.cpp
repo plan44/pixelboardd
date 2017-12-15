@@ -70,7 +70,7 @@ void ViewStack::removeView(ViewPtr aView)
 
 bool ViewStack::step()
 {
-  bool complete = true;
+  bool complete = inherited::step();
   for (ViewsList::iterator pos = viewStack.begin(); pos!=viewStack.end(); ++pos) {
     if (!(*pos)->step()) {
       complete = false;
@@ -84,7 +84,8 @@ bool ViewStack::isDirty()
 {
   if (inherited::isDirty()) return true; // dirty anyway
   for (ViewsList::iterator pos = viewStack.begin(); pos!=viewStack.end(); ++pos) {
-    if ((*pos)->isDirty()) return true; // subview is dirty -> stack is dirty
+    if ((*pos)->isDirty())
+      return true; // subview is dirty -> stack is dirty
   }
   return false;
 }

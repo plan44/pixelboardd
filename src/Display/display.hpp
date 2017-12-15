@@ -37,7 +37,6 @@ namespace p44 {
 
     TextViewPtr message;
     ImageViewPtr bgimage;
-    ViewStackPtr stack;
     string defaultMessage;
     MLMicroSeconds lastMessageShow;
     MLMicroSeconds autoMessageTimeout = 3*Minute;
@@ -57,11 +56,6 @@ namespace p44 {
     /// @return true if complete, false if step() would like to be called immediately again
     /// @note this is called on the active page at least once per mainloop cycle
     virtual bool step() P44_OVERRIDE;
-
-    /// get color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    virtual PixelColor colorAt(int aX, int aY) P44_OVERRIDE;
 
     /// show PNG on DisplayPage
     ErrorPtr loadPNGBackground(const string aPNGFileName);
@@ -87,12 +81,6 @@ namespace p44 {
 
     /// clear entire field
     void clear();
-
-    /// get background color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    PixelColor bgColorAt(int aX, int aY);
-
 
     void showMessage(const string aMessage);
 

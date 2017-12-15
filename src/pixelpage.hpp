@@ -68,6 +68,7 @@ namespace p44 {
     string name;
     PixelPageInfoCB infoCallback;
     bool dirty;
+    ViewPtr view; ///< this page's view
 
   public :
 
@@ -109,15 +110,21 @@ namespace p44 {
     virtual bool handleRequest(JsonObjectPtr aRequest, RequestDoneCB aRequestDoneCB);
 
     /// return if anything changed on the display since last call
-    bool isDirty() { return dirty; };
+    bool isDirty();
 
     /// call when display is updated
-    void updated() { dirty = false; };
+    void updated();
+
+    /// set view
+    void setView(ViewPtr aView);
+
+    /// get view
+    ViewPtr getView() { return view; };
 
     /// get color at X,Y
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
-    virtual PixelColor colorAt(int aX, int aY) = 0;
+    virtual PixelColor colorAt(int aX, int aY);
 
     /// true if coordinate is within display
     bool isWithin(int aX, int aY);

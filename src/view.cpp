@@ -98,6 +98,13 @@ void View::setAlpha(int aAlpha)
 }
 
 
+void View::stopFading()
+{
+  targetAlpha = -1;
+  fadeCompleteCB = NULL; // did not run to end
+}
+
+
 void View::fadeTo(int aAlpha, MLMicroSeconds aWithIn, SimpleCB aCompletedCB)
 {
   fadeDist = aAlpha-alpha;
