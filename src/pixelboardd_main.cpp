@@ -112,6 +112,7 @@ public:
       { 0  , "errlevel",       true,  "level;set max level for log messages to go to stderr as well" },
       { 0  , "dontlogerrors",  false, "don't duplicate error messages (see --errlevel) on stdout" },
       { 0  , "deltatstamps",   false, "show timestamp delta between log lines" },
+      { 'r', "resourcepath",   true,  "path;path to the images and sounds folders" },
       { 'h', "help",           false, "show this text" },
       { 0, NULL } // list terminator
     };
