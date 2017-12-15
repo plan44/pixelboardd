@@ -37,6 +37,7 @@ View::View()
   contentSizeY = 0;
   backgroundColor = { .r=0, .g=0, .b=0, .a=0 }; // transparent background...
   alpha = 255; // but content pixels passed trough 1:1
+  targetAlpha = -1; // not fading
 }
 
 
@@ -64,8 +65,58 @@ void View::setFrame(int aOriginX, int aOriginY, int aSizeX, int aSizeY)
 
 bool View::step()
 {
+  // check fading
+  if (targetAlpha>=0) {
+    double timeDone = (double)(MainLoop::now()-startTime)/fadeTime;
+    if (timeDone<1) {
+      // continue fading
+      int currentAlpha = targetAlpha-(1-timeDone)*fadeDist;
+      setAlpha(currentAlpha);
+    }
+    else {
+      // target alpha reached
+      setAlpha(targetAlpha);
+      targetAlpha = -1;
+      // call back
+      if (fadeCompleteCB) {
+        SimpleCB cb = fadeCompleteCB;
+        fadeCompleteCB = NULL;
+        cb();
+      }
+    }
+  }
   return true; // completed
 }
+
+
+void View::setAlpha(int aAlpha)
+{
+  if (alpha!=aAlpha) {
+    alpha = aAlpha;
+    makeDirty();
+  }
+}
+
+
+void View::fadeTo(int aAlpha, MLMicroSeconds aWithIn, SimpleCB aCompletedCB)
+{
+  fadeDist = aAlpha-alpha;
+  startTime = MainLoop::now();
+  fadeTime = aWithIn;
+  if (fadeTime<=0 || fadeDist==0) {
+    // immediate
+    setAlpha(aAlpha);
+    targetAlpha = -1;
+    if (aCompletedCB) aCompletedCB();
+  }
+  else {
+    // start fading
+    targetAlpha = aAlpha;
+    fadeCompleteCB = aCompletedCB;
+  }
+}
+
+
 
 
 #define SHOW_ORIGIN 0

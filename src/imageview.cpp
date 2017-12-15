@@ -26,7 +26,8 @@ using namespace p44;
 // MARK: ===== ImageView
 
 
-ImageView::ImageView()
+ImageView::ImageView() :
+  pngBuffer(NULL)
 {
 }
 

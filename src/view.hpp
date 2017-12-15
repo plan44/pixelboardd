@@ -51,6 +51,13 @@ namespace p44 {
 
     bool dirty;
 
+    /// fading
+    int targetAlpha; ///< alpha to reach at end of fading, -1 = not fading
+    int fadeDist; ///< amount to fade
+    MLMicroSeconds startTime; ///< time when fading has started
+    MLMicroSeconds fadeTime; ///< how long fading takes
+    SimpleCB fadeCompleteCB; ///< fade complete
+
   public:
 
     // Orientation
@@ -119,7 +126,15 @@ namespace p44 {
     /// @param aBackGroundColor color of pixels not covered by content
     void setBackGroundColor(PixelColor aBackGroundColor) { backgroundColor = aBackGroundColor; makeDirty(); };
 
-    void setAlpha(int aAlpha) { alpha = aAlpha; makeDirty(); }
+    /// set view's alpha
+    /// @param aAlpha 0=fully transparent, 255=fully opaque
+    void setAlpha(int aAlpha);
+
+    /// fade alpha
+    /// @param aAlpha 0=fully transparent, 255=fully opaque
+    /// @param aWithIn time from now when specified aAlpha should be reached
+    /// @param aCompletedCB is called when fade is complete
+    void fadeTo(int aAlpha, MLMicroSeconds aWithIn, SimpleCB aCompletedCB = NULL);
 
     /// @param aOrientation the orientation of the content
     void setOrientation(Orientation aOrientation) { contentOrientation = aOrientation; makeDirty(); }

@@ -45,6 +45,8 @@ void DisplayPage::show(PageMode aMode)
 {
   makeDirty();
   showMessage(defaultMessage);
+  bgimage->setAlpha(0);
+  bgimage->fadeTo(255, 3*Second);
 }
 
 
@@ -60,8 +62,8 @@ bool DisplayPage::step()
     if (lastMessageShow+autoMessageTimeout<MainLoop::now() && defaultMessage.size()>0) {
       showMessage(defaultMessage);
     }
-    message->step();
   }
+  stack->step();
   if (stack->isDirty()) makeDirty();
   return true;
 }
