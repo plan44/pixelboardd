@@ -24,12 +24,16 @@
 
 #include "pixelpage.hpp"
 #include "textview.hpp"
+#include "imageview.hpp"
+#include "viewstack.hpp"
+#include "viewanimator.hpp"
 
 
 namespace p44 {
 
 
   class BlocksPage;
+  class BlocksView;
 
   typedef struct {
     uint8_t r;
@@ -55,7 +59,7 @@ namespace p44 {
   class Block : public P44Obj
   {
 
-    BlocksPage &playField; ///< the playfield
+    BlocksPage &gameController; ///< the game controller
     ColorCode colorCode; ///< the color code of the piece
     int x; ///< X coordinate of the (rotation) center of the piece
     int y; ///< Y coordinate of the (rotation) center of the piece
@@ -65,7 +69,7 @@ namespace p44 {
 
   public:
 
-    Block(BlocksPage &aPlayField, BlockType aBlockType, ColorCode aColorCode = 0);
+    Block(BlocksPage &aGameController, BlockType aBlockType, ColorCode aColorCode = 0);
 
     /// remove from playfield
     void remove();
@@ -130,8 +134,50 @@ namespace p44 {
   };
 
 
+  class BlocksView : public View
+  {
+    typedef View inherited;
+    friend class Block;
+
+    ColorCode colorCodes[PAGE_NUMPIXELS]; ///< internal representation
+
+  public:
+
+    BlocksView();
+
+    /// clear contents of this view
+    /// @note base class just resets content size to zero, subclasses might NOT want to do that
+    ///   and thus choose NOT to call inherited.
+    virtual void clear() P44_OVERRIDE;
+
+    /// get color at X,Y
+    /// @param aX PlayField X coordinate
+    /// @param aY PlayField Y coordinate
+    ColorCode colorCodeAt(int aX, int aY);
+
+    /// set color at X,Y
+    /// @param aX PlayField X coordinate
+    /// @param aY PlayField Y coordinate
+    void setColorCodeAt(ColorCode aColorCode, int aX, int aY);
+
+  protected:
+
+    /// get color at X,Y
+    /// @param aX PlayField X coordinate
+    /// @param aY PlayField Y coordinate
+    virtual PixelColor contentColorAt(int aX, int aY) P44_OVERRIDE;
+
+  };
+  typedef boost::intrusive_ptr<BlocksView> BlocksViewPtr;
+
+
+
+
   class BlocksPage : public PixelPage
   {
+    typedef PixelPage inherited;
+    friend class Block;
+
     enum {
       game_ready,
       game_paused,
@@ -140,11 +186,6 @@ namespace p44 {
     } gameState;
 
     PageMode gameMode;
-
-    typedef PixelPage inherited;
-    friend class Block;
-
-    ColorCode colorCodes[PAGE_NUMPIXELS]; ///< internal representation
 
     BlockRunner activeBlocks[2]; ///< the max 2 active blocks (top and bottom)
     int score[2]; ///< the score for the players
@@ -158,6 +199,10 @@ namespace p44 {
     PageMode playModeAccumulator;
     PageMode defaultMode;
 
+    // the views
+    ViewStackPtr infoView;
+    ImageViewPtr twoSidedView;
+    BlocksViewPtr playfield;
     TextViewPtr scoretext;
 
   public :
@@ -194,29 +239,6 @@ namespace p44 {
     /// @return bits 0..3 correspond to LEDs for key 0..3
     virtual KeyCodes keyLedState(int aSide) P44_OVERRIDE;
 
-    /// get color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    virtual PixelColor colorAt(int aX, int aY) P44_OVERRIDE;
-
-  protected:
-
-    /// get color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    ColorCode colorCodeAt(int aX, int aY);
-
-    /// set color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    void setColorCodeAt(ColorCode aColorCode, int aX, int aY);
-
-    /// check if X,Y is within (or ouside above/below) playfield
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    /// @param aOpenAtBottom if set, playfield is considered open at the bottom
-    bool isWithinPlayfield(int aX, int aY, bool aOpen = false, bool aOpenAtBottom = false);
-
     /// launch a block into the playfield
     /// @param aBlockType the type of block
     /// @param aColumn the column where to launch (will be adjusted left or right in case block extends playfield)
@@ -226,18 +248,26 @@ namespace p44 {
 
     /// launch new random block
     bool launchRandomBlock(bool aBottom);
-    
+
     /// move block
     void moveBlock(int aDx, int aRot, bool aLower);
 
     /// change speed of block
     void dropBlock(bool aLower);
 
+  protected:
+
+    /// check if X,Y is within (or ouside above/below) playfield
+    /// @param aX PlayField X coordinate
+    /// @param aY PlayField Y coordinate
+    /// @param aOpenAtBottom if set, playfield is considered open at the bottom
+    bool isWithinPlayfield(int aX, int aY, bool aOpen = false, bool aOpenAtBottom = false);
+
   private:
 
     void clear();
     void stop();
-    void makeReady(bool aWithAutostart);
+    void makeReady(bool aNewShow);
     void startAccTimeout();
     bool enabledSide(int aSide);
     void startGame(PageMode aMode); // 0x01=single player normal, 0x02=single player reversed, 0x03=dual player
@@ -246,7 +276,6 @@ namespace p44 {
     void gameOver();
     void removeRow(int aY, bool aBlockFromBottom, int aRemovedRows);
     void checkRows(bool aBlockFromBottom, int aRemovedRows);
-
 
   };
   typedef boost::intrusive_ptr<BlocksPage> BlocksPagePtr;

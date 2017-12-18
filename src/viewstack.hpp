@@ -67,10 +67,14 @@ namespace p44 {
     /// call when display is updated
     void updated();
 
-    /// get color at X,Y
-    /// @param aX PlayField X coordinate
-    /// @param aY PlayField Y coordinate
-    virtual PixelColor colorAt(int aX, int aY);
+  protected:
+
+    /// get content pixel color
+    /// @param aX content X coordinate
+    /// @param aY content Y coordinate
+    /// @note aX and aY are NOT guaranteed to be within actual content as defined by contentSizeX/Y
+    ///   implementation must check this!
+    virtual PixelColor contentColorAt(int aX, int aY);
 
   };
   typedef boost::intrusive_ptr<ViewStack> ViewStackPtr;

@@ -92,6 +92,16 @@ void PixelPage::setView(ViewPtr aView)
 }
 
 
+void PixelPage::sizeViewToPage(ViewPtr aView)
+{
+  if (!aView) aView = view; // default is my own view
+  if (aView) {
+    aView->setFrame(0, 0, PAGE_NUMCOLS, PAGE_NUMROWS);
+  }
+}
+
+
+
 JsonObjectPtr PixelPage::errorAnswer(ErrorPtr aError)
 {
   JsonObjectPtr ans;
@@ -109,7 +119,7 @@ void PixelPage::postInfo(const string aInfo)
 }
 
 
-bool PixelPage::isWithin(int aX, int aY)
+bool PixelPage::isWithinPage(int aX, int aY)
 {
   if (aX<0 || aX>=PAGE_NUMCOLS) return false;
   if (aY<0 || aY>=PAGE_NUMROWS) return false;

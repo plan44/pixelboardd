@@ -21,6 +21,8 @@
 
 #include "blocks.hpp"
 
+#include "application.hpp"
+
 using namespace p44;
 
 
@@ -104,8 +106,8 @@ static const ColorDef colorDefs[33] = {
 
 // MARK: ===== Block
 
-Block::Block(BlocksPage &aPlayField, BlockType aBlockType, ColorCode aColorCode) :
-  playField(aPlayField),
+Block::Block(BlocksPage &aGameController, BlockType aBlockType, ColorCode aColorCode) :
+  gameController(aGameController),
   blockType(aBlockType),
   colorCode(aColorCode),
   shown(false),
@@ -171,7 +173,7 @@ void Block::remove()
   if (shown) {
     shown = false;
     while (getPositionedPixel(idx, x, y, orientation, px, py)) {
-      playField.setColorCodeAt(0, px, py);
+      gameController.playfield->setColorCodeAt(0, px, py);
       idx++;
     }
   }
@@ -185,7 +187,7 @@ void Block::show()
   if (!shown) {
     shown = true;
     while (getPositionedPixel(idx, x, y, orientation, px, py)) {
-      playField.setColorCodeAt(colorCode, px, py);
+      gameController.playfield->setColorCodeAt(colorCode, px, py);
       idx++;
     }
   }
@@ -198,7 +200,7 @@ void Block::dim()
   int idx=0;
   shown = true;
   while (getPositionedPixel(idx, x, y, orientation, px, py)) {
-    playField.setColorCodeAt(colorCode | 0x10, px, py);
+    gameController.playfield->setColorCodeAt(colorCode | 0x10, px, py);
     idx++;
   }
 }
@@ -214,7 +216,7 @@ bool Block::position(int aX, int aY, int aOrientation, bool aOpenAtBottom)
   remove();
   // check that new position is free
   while (getPositionedPixel(idx, aX, aY, aOrientation, px, py)) {
-    if (!playField.isWithinPlayfield(px, py, true, aOpenAtBottom) || playField.colorCodeAt(px, py)!=0) {
+    if (!gameController.isWithinPlayfield(px, py, true, aOpenAtBottom) || gameController.playfield->colorCodeAt(px, py)!=0) {
       // collision or not within field
       if (wasShown) {
         // show again at previous position
@@ -246,24 +248,126 @@ bool Block::move(int aDx, int aDy, int aRot, bool aOpenAtBottom)
 
 
 
+// MARK: ===== BlocksView
+
+BlocksView::BlocksView()
+{
+  setContentSize(10, 20); // Tetris has fixed size of 10x20
+}
+
+
+void BlocksView::clear()
+{
+  for (int i=0; i<PAGE_NUMPIXELS; ++i) {
+    colorCodes[i] = 0;
+  }
+  makeDirty();
+}
+
+
+ColorCode BlocksView::colorCodeAt(int aX, int aY)
+{
+  if (!isInContentSize(aX, aY)) return 0;
+  return colorCodes[aY*PAGE_NUMCOLS+aX];
+}
+
+
+void BlocksView::setColorCodeAt(ColorCode aColorCode, int aX, int aY)
+{
+  if (!isInContentSize(aX, aY)) return;
+  colorCodes[aY*PAGE_NUMCOLS+aX] = aColorCode;
+}
+
+
+PixelColor BlocksView::contentColorAt(int aX, int aY)
+{
+  uint8_t cc = colorCodeAt(aX, aY);
+  // map to real color
+  PixelColor pix;
+  const ColorDef *cdef = &colorDefs[cc];
+  pix.r = cdef->r;
+  pix.g = cdef->g;
+  pix.b = cdef->b;
+  pix.a = 255;
+  if (cc>=16 && cc<32) {
+    pix = dimPixel(pix, 188);
+  }
+  return pix;
+}
+
+
+
+
 // MARK: ===== BlocksPage
 
+#define BLOCKS_HELP_ANIMATION_STEP_TIME (333*MilliSecond)
 
 BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   inherited("blocks", aInfoCallback),
-  stepInterval(0.7*Second),
-  dropStepInterval(0.05*Second),
-  rowKillDelay(0.15*Second),
   defaultMode(0x01),
   gameState(game_ready),
   gameMode(0),
   playModeAccumulator(0),
   rowKillTicket(0),
-  stateChangeTicket(0)
+  stateChangeTicket(0),
+  stepInterval(0.7*Second),
+  dropStepInterval(0.05*Second),
+  rowKillDelay(0.15*Second)
 {
   stop();
+  // game view
+  playfield = BlocksViewPtr(new BlocksView);
+  sizeViewToPage(playfield);
+  // help view
+  infoView = ViewStackPtr(new ViewStack());
+  sizeViewToPage(infoView);
+  infoView->setFullFrameContent();
+  ImageViewPtr iv = ImageViewPtr(new ImageView);
+  sizeViewToPage(iv);
+  iv->loadPNG(Application::sharedApplication()->resourcePath("images/blocks.png"));
+  infoView->pushView(iv);
+  // additional pixels for two-sided play
+  twoSidedView = ImageViewPtr(new ImageView);
+  sizeViewToPage(twoSidedView);
+  twoSidedView->loadPNG(Application::sharedApplication()->resourcePath("images/blocks2s.png"));
+  twoSidedView->hide(); // hidden to start with
+  infoView->pushView(twoSidedView);
+  // - the animation
+  ViewAnimatorPtr va = ViewAnimatorPtr(new ViewAnimator);
+  sizeViewToPage(va);
+  va->setFullFrameContent();
+  // - the steps
+  iv = ImageViewPtr(new ImageView);
+  sizeViewToPage(iv);
+  iv->loadPNG(Application::sharedApplication()->resourcePath("images/blocks1.png"));
+  va->pushStep(iv, BLOCKS_HELP_ANIMATION_STEP_TIME);
+  iv = ImageViewPtr(new ImageView);
+  sizeViewToPage(iv);
+  iv->loadPNG(Application::sharedApplication()->resourcePath("images/blocks2.png"));
+  va->pushStep(iv, BLOCKS_HELP_ANIMATION_STEP_TIME);
+  iv = ImageViewPtr(new ImageView);
+  sizeViewToPage(iv);
+  iv->loadPNG(Application::sharedApplication()->resourcePath("images/blocks3.png"));
+  va->pushStep(iv, BLOCKS_HELP_ANIMATION_STEP_TIME);
+  // - push animation on top
+  infoView->pushView(va);
+  va->startAnimation(true);
+  // score text view
   scoretext = TextViewPtr(new TextView(2, 0, 20, View::down));
   scoretext->setTextColor({255, 128, 0, 255});
+  // main stack
+  ViewStackPtr mv = ViewStackPtr(new ViewStack());
+  sizeViewToPage(mv);
+  mv->setFullFrameContent();
+  // - game as basis
+  mv->pushView(playfield);
+  // - initially visible help, transparent score
+  infoView->show();
+  mv->pushView(infoView);
+  scoretext->hide();
+  mv->pushView(scoretext);
+  // install it in this page
+  setView(mv);
 }
 
 
@@ -276,9 +380,7 @@ void BlocksPage::hide()
 void BlocksPage::clear()
 {
   stop();
-  for (int i=0; i<PAGE_NUMPIXELS; ++i) {
-    colorCodes[i] = 0;
-  }
+  playfield->clear();
   makeDirty();
 }
 
@@ -306,14 +408,17 @@ void BlocksPage::show(PageMode aMode)
 }
 
 
-void BlocksPage::makeReady(bool aWithAutostart)
+void BlocksPage::makeReady(bool aNewShow)
 {
   gameState = game_ready;
+  infoView->show();
   playModeAccumulator = 0;
   // show start keys
   ledState[0] = keycode_middleleft; // Turn = start
   ledState[1] = keycode_middleleft; // Turn = start
-  if (aWithAutostart) {
+  if (aNewShow) {
+    // do not show last score
+    scoretext->hide();
     // auto-start default game in 15 secs
     MainLoop::currentMainLoop().executeTicketOnce(
       stateChangeTicket,
@@ -347,6 +452,10 @@ void BlocksPage::startGame(PageMode aMode)
   ledState[0] = keycode_none;
   ledState[1] = keycode_none;
   gameState = game_running;
+  playfield->show();
+  scoretext->hide();
+  infoView->hide();
+  twoSidedView->setVisible((gameMode&pagemode_controls_mask)==pagemode_controls_mask); // show for next game if this game was two-sided
   if ((gameMode & pagemode_controls1) || gameMode==0) {
     // normal side
     launchRandomBlock(false);
@@ -363,6 +472,7 @@ void BlocksPage::startGame(PageMode aMode)
 void BlocksPage::pause()
 {
   gameState = game_paused;
+  playfield->setAlpha(200); // dimmed
   if (enabledSide(0)) ledState[0] = keycode_middleleft;
   if (enabledSide(1)) ledState[1] = keycode_middleleft;
 }
@@ -371,6 +481,7 @@ void BlocksPage::pause()
 void BlocksPage::resume()
 {
   gameState = game_running;
+  playfield->show(); // normal
   if (enabledSide(0)) ledState[0] = keycode_all;
   if (enabledSide(1)) ledState[1] = keycode_all;
 }
@@ -380,35 +491,13 @@ void BlocksPage::resume()
 void BlocksPage::gameOver()
 {
   gameState = game_over;
+  playfield->setAlpha(128); // dim board a lot
   MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
   ledState[0] = keycode_none; // LEDs off
   ledState[1] = keycode_none; // LEDs off
   scoretext->setText(string_format("%d", score[0]+score[1]), true);
+  scoretext->show(); // show
   makeDirty();
-}
-
-
-PixelColor BlocksPage::colorAt(int aX, int aY)
-{
-  uint8_t cc = colorCodeAt(aX, aY);
-  PixelColor pix;
-  const ColorDef *cdef = &colorDefs[cc];
-  pix.r = cdef->r;
-  pix.g = cdef->g;
-  pix.b = cdef->b;
-  if (gameState==game_over || gameState==game_ready) {
-    pix = dimPixel(pix, 128);
-    // overlay text
-    PixelColor ovl = scoretext->colorAt(aX, aY);
-    overlayPixel(pix, ovl);
-  }
-  else if (gameState==game_paused) {
-    pix = dimPixel(pix, 202);
-  }
-  else if (cc>=16 && cc<32) {
-    pix = dimPixel(pix, 188);
-  }
-  return pix;
 }
 
 
@@ -418,20 +507,6 @@ bool BlocksPage::isWithinPlayfield(int aX, int aY, bool aOpen, bool aOpenAtBotto
   if ((aOpenAtBottom || !aOpen) && aY>=PAGE_NUMROWS) return false; // may not extend above playfield
   if ((!aOpenAtBottom || !aOpen) && aY<0) return false; // may not extend below playfield
   return true; // within
-}
-
-
-ColorCode BlocksPage::colorCodeAt(int aX, int aY)
-{
-  if (!isWithin(aX, aY)) return 0;
-  return colorCodes[aY*PAGE_NUMCOLS+aX];
-}
-
-
-void BlocksPage::setColorCodeAt(ColorCode aColorCode, int aX, int aY)
-{
-  if (!isWithin(aX, aY)) return;
-  colorCodes[aY*PAGE_NUMCOLS+aX] = aColorCode;
 }
 
 
@@ -454,11 +529,24 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
   else if (gameState==game_ready) {
     // turn starts (after 2 seconds timeout), others exit game
     if (aNewPressedKeys & keycode_middleleft) {
+      PageMode newMode = aSide==1 ? pagemode_controls2 : pagemode_controls1;
+      if (playModeAccumulator!=0) {
+        // at least one player has already joined
+        if ((playModeAccumulator & newMode)==0) {
+          // second side joined, show their help
+          twoSidedView->show();
+        }
+      }
+      else {
+        // first player, turn help for her if it is on the far side
+        #warning can't work yet, because stack does not (yet) do transformation
+        infoView->setOrientation(aSide==1 ? View::left : View::right);
+      }
       // add to acculumator
-      playModeAccumulator |= aSide==1 ? pagemode_controls2 : pagemode_controls1;
+      playModeAccumulator |= newMode;
       ledState[aSide==1 ? 1 : 0] = keycode_all; // immediate feedback: all 4 keys on
       // but start with a little delay so other player can also join
-      MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 2*Second);
+      MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 3*Second);
     }
     else if (aNewPressedKeys) {
       postInfo("quit");
@@ -571,7 +659,7 @@ void BlocksPage::removeRow(int aY, bool aBlockFromBottom, int aRemovedRows)
   int dir = aBlockFromBottom ? -1 : 1;
   for (int y=aY; (aBlockFromBottom ? y>=0 : y<PAGE_NUMROWS); y += dir) {
     for (int x=0; x<PAGE_NUMCOLS; x++) {
-      setColorCodeAt(colorCodeAt(x, y+dir), x, y);
+      playfield->setColorCodeAt(playfield->colorCodeAt(x, y+dir), x, y);
     }
   }
   // re-show running blocks
@@ -595,7 +683,7 @@ void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
     // check each row
     bool hasGap = false;
     for (int x=0; x<PAGE_NUMCOLS; x++) {
-      if (colorCodeAt(x, y)==0) {
+      if (playfield->colorCodeAt(x, y)==0) {
         hasGap = true;
         break;
       }
@@ -604,7 +692,7 @@ void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
       // full row found
       for (int x=0; x<PAGE_NUMCOLS; x++) {
         // light up
-        setColorCodeAt(32, x, y); // row flash
+        playfield->setColorCodeAt(32, x, y); // row flash
       }
       makeDirty();
       rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom, aRemovedRows), rowKillDelay);
@@ -677,7 +765,7 @@ bool BlocksPage::step()
   }
   scoretext->step();
   if (scoretext->isDirty()) makeDirty();
-  return true; // no need to call again immediately
+  return inherited::step(); // let baseclass step (view etc.)
 }
 
 

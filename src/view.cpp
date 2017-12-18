@@ -53,6 +53,12 @@ void View::clear()
 }
 
 
+bool View::isInContentSize(int aX, int aY)
+{
+  return aX>=0 && aY>=0 && aX<contentSizeX && aY<contentSizeY;
+}
+
+
 void View::setFrame(int aOriginX, int aOriginY, int aSizeX, int aSizeY)
 {
   originX = aOriginX;
@@ -121,6 +127,14 @@ void View::fadeTo(int aAlpha, MLMicroSeconds aWithIn, SimpleCB aCompletedCB)
     targetAlpha = aAlpha;
     fadeCompleteCB = aCompletedCB;
   }
+}
+
+
+void View::setFullFrameContent()
+{
+  setContentSize(dX, dY);
+  setContentOffset(0, 0);
+  setOrientation(View::right);
 }
 
 

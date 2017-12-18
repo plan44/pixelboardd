@@ -20,6 +20,7 @@
 //
 
 #include "display.hpp"
+#include "application.hpp"
 
 using namespace p44;
 
@@ -32,11 +33,16 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
   lastMessageShow(Never)
 {
   clear();
+  // user defined content
   message = TextViewPtr(new TextView(2, 0, 20, View::down));
   bgimage = ImageViewPtr(new ImageView());
-  bgimage->setFrame(0, 0, PAGE_NUMCOLS, PAGE_NUMROWS);
+  sizeViewToPage(bgimage);
+  // help screen
+  infoView = ImageViewPtr(new ImageView());
+  infoView->loadPNG(Application::sharedApplication()->resourcePath("images/main.png"));
   ViewStackPtr stack = ViewStackPtr(new ViewStack());
   stack->pushView(bgimage);
+  stack->pushView(infoView);
   stack->pushView(message);
   setView(stack);
 }
@@ -45,9 +51,16 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
 void DisplayPage::show(PageMode aMode)
 {
   makeDirty();
-  showMessage(defaultMessage);
-  bgimage->setAlpha(0);
-  bgimage->fadeTo(255, 3*Second);
+  infoFlash(0);
+  // showMessage(defaultMessage);
+}
+
+
+void DisplayPage::infoFlash(int aSide)
+{
+  infoView->setOrientation(aSide ? View::left : View::right);
+  infoView->show();
+  infoView->fadeTo(0, 10*Second);
 }
 
 
@@ -120,6 +133,7 @@ void DisplayPage::setDefaultMessage(const string aMessage)
 
 bool DisplayPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
+  infoFlash(aSide); // every keypress revives info
   if (aNewPressedKeys & keycode_left) {
     postInfo("go0");
   }

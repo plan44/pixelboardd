@@ -37,6 +37,7 @@ namespace p44 {
 
     TextViewPtr message;
     ImageViewPtr bgimage;
+    ImageViewPtr infoView;
     string defaultMessage;
     MLMicroSeconds lastMessageShow;
     MLMicroSeconds autoMessageTimeout = 3*Minute;
@@ -82,6 +83,7 @@ namespace p44 {
     /// clear entire field
     void clear();
 
+    void infoFlash(int aSide);
     void showMessage(const string aMessage);
 
   };

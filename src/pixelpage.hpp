@@ -39,6 +39,7 @@ namespace p44 {
   enum {
     pagemode_controls1 = 0x01,
     pagemode_controls2 = 0x02,
+    pagemode_controls_mask = 0x03,
     pagemode_startnow = 0x04
   } PageModeEnum;
   typedef uint8_t PageMode;
@@ -121,13 +122,18 @@ namespace p44 {
     /// get view
     ViewPtr getView() { return view; };
 
+    /// size view to fill page
+    /// @param aView view to size such that it covers the entire page, if none -> size page's main view
+    /// @note content size is not affected
+    void sizeViewToPage(ViewPtr aView = ViewPtr());
+
     /// get color at X,Y
     /// @param aX PlayField X coordinate
     /// @param aY PlayField Y coordinate
     virtual PixelColor colorAt(int aX, int aY);
 
     /// true if coordinate is within display
-    bool isWithin(int aX, int aY);
+    bool isWithinPage(int aX, int aY);
 
   protected:
 

@@ -86,7 +86,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--message &quot;You can play Tetris by touching the board&quot;"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--defaultpage display"

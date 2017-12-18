@@ -102,6 +102,9 @@ namespace p44 {
     ///   implementation must check this!
     virtual PixelColor contentColorAt(int aX, int aY) { return backgroundColor; }
 
+    /// helper for implementations: check if aX/aY within set content size
+    bool isInContentSize(int aX, int aY);
+
     /// set dirty - to be called by step() implementation when the view needs to be redisplayed
     void makeDirty() { dirty = true; };
 
@@ -113,6 +116,8 @@ namespace p44 {
     virtual ~View();
 
     /// clear contents of this view
+    /// @note base class just resets content size to zero, subclasses might NOT want to do that
+    ///   and thus choose NOT to call inherited.
     virtual void clear();
 
     /// set the frame within the board coordinate system
@@ -120,7 +125,7 @@ namespace p44 {
     /// @param aOriginY origin Y on pixelboard
     /// @param aSizeX the X width of the view
     /// @param aSizeY the Y width of the view
-    void setFrame(int aOriginX, int aOriginY, int aSizeX, int aSizeY);
+    virtual void setFrame(int aOriginX, int aOriginY, int aSizeX, int aSizeY);
 
     /// set the view's background color
     /// @param aBackGroundColor color of pixels not covered by content
@@ -129,6 +134,16 @@ namespace p44 {
     /// set view's alpha
     /// @param aAlpha 0=fully transparent, 255=fully opaque
     void setAlpha(int aAlpha);
+
+    /// hide (set alpha to 0)
+    void hide() { setAlpha(0); };
+
+    /// show (set alpha to max)
+    void show() { setAlpha(255); };
+
+    /// set visible (hide or show)
+    /// @param aVisible true to show, false to hide
+    void setVisible(bool aVisible) { if (aVisible) show(); else hide(); };
 
     /// fade alpha
     /// @param aAlpha 0=fully transparent, 255=fully opaque
@@ -148,6 +163,9 @@ namespace p44 {
 
     /// set content size
     void setContentSize(int aSizeX, int aSizeY) { contentSizeX = aSizeX; contentSizeY = aSizeY; makeDirty(); };
+
+    /// set content size to full frame content with same coordinates
+    void setFullFrameContent();
 
     /// calculate changes on the display, return true if any
     /// @return true if complete, false if step() would like to be called immediately again

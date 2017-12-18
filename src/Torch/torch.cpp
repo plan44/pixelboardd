@@ -256,7 +256,7 @@ PixelColor TorchPage::colorAt(int aX, int aY)
   pix.b = 120;
   pix.a = 0;
 
-//  if (!isWithin(aX, aY)) {
+//  if (!isWithinPage(aX, aY)) {
 //    pix.r = 0;
 //    pix.g = 0;
 //    pix.b = 0;

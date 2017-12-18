@@ -164,7 +164,7 @@ void ViewAnimator::updated()
 }
 
 
-PixelColor ViewAnimator::colorAt(int aX, int aY)
+PixelColor ViewAnimator::contentColorAt(int aX, int aY)
 {
   // default is the viewstack's background color
   if (alpha==0 || !currentView) {

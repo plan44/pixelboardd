@@ -100,7 +100,7 @@ void ViewStack::updated()
 }
 
 
-PixelColor ViewStack::colorAt(int aX, int aY)
+PixelColor ViewStack::contentColorAt(int aX, int aY)
 {
   // default is the viewstack's background color
   if (alpha==0) {
