@@ -64,6 +64,7 @@ class PixelBoardD : public CmdLineApp
 
   // API Server
   SocketCommPtr apiServer;
+  bool displayMirrorDirty;
 
   // The display pages
   string defaultPageName;
@@ -398,6 +399,34 @@ public:
       aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
       return true;
     }
+    else if (aUri=="display") {
+      // get current display colors
+      JsonObjectPtr answer = JsonObject::newArray();
+      bool onlychanged = false;
+      bool flipped = false;
+      if (aData->get("onlychanged", o)) {
+        onlychanged = o->boolValue();
+      }
+      if (aData->get("flipped", o)) {
+        flipped = o->boolValue();
+      }
+      if (!onlychanged || displayMirrorDirty) {
+        for (int y=PAGE_NUMROWS-1; y>=0; y--) {
+          for (int x=0; x<PAGE_NUMCOLS; x++) {
+            if (flipped) {
+              x = PAGE_NUMCOLS-1-x;
+              y = PAGE_NUMROWS-1-y;
+            }
+            uint8_t r,g,b,w;
+            display->getColorXY(x, y, r, g, b, w);
+            answer->arrayAppend(JsonObject::newString(string_format("#%02X%02X%02X", r, g, b)));
+          }
+        }
+      }
+      displayMirrorDirty = false;
+      aRequestDoneCB(answer, err);
+      return true;
+    }
     else if (aUri=="page") {
       // ask each page
       for (PagesMap::iterator pos = pages.begin(); pos!=pages.end(); ++pos) {
@@ -417,7 +446,6 @@ public:
       if (cmd=="imageupload" && displayPage) {
         ErrorPtr err = displayPage->loadPNGBackground(uploadedfile);
         gotoPage("display", false);
-        updateDisplay();
         aRequestDoneCB(JsonObjectPtr(), err);
         return true;
       }
@@ -491,8 +519,9 @@ public:
   void updateDisplay()
   {
     if (currentPage && currentPage->isDirty()) {
-      for (int x=0; x<10; x++) {
-        for (int y=0; y<20; y++) {
+      displayMirrorDirty = true;
+      for (int x=0; x<PAGE_NUMCOLS; x++) {
+        for (int y=0; y<PAGE_NUMROWS; y++) {
           PixelColor p = currentPage->colorAt(x, y);
           display->setColorXY(x, y, p.r, p.g, p.b);
         }

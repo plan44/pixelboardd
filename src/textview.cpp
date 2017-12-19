@@ -186,9 +186,9 @@ TextView::TextView(int aOriginX, int aOriginY, int aWidth, int aOrientation) :
   setContentSize(aWidth, rowsPerGlyph);
   setOrientation(aOrientation);
   textPixels = new uint8_t[contentSizeX*rowsPerGlyph];
-  textColor.r = 42;
-  textColor.g = 42;
-  textColor.b = 42;
+  textColor.r = 200;
+  textColor.g = 200;
+  textColor.b = 200;
   textColor.a = 255;
   text_intensity = 255; // intensity of last column of text (where text appears)
   cycles_per_px = 5;
