@@ -42,8 +42,8 @@ DisplayPage::DisplayPage(PixelPageInfoCB aInfoCallback) :
   infoView->loadPNG(Application::sharedApplication()->resourcePath("images/main.png"));
   ViewStackPtr stack = ViewStackPtr(new ViewStack());
   stack->pushView(bgimage);
-  stack->pushView(infoView);
   stack->pushView(message);
+  stack->pushView(infoView);
   setView(stack);
 }
 
@@ -56,11 +56,13 @@ void DisplayPage::show(PageMode aMode)
 }
 
 
-void DisplayPage::infoFlash(int aSide)
+bool DisplayPage::infoFlash(int aSide)
 {
+  bool wasVisible = infoView->getAlpha()>0;
   infoView->setOrientation(aSide ? View::left : View::right);
   infoView->show();
-  infoView->fadeTo(0, 10*Second);
+  infoView->fadeTo(0, 15*Second);
+  return wasVisible;
 }
 
 
@@ -133,18 +135,21 @@ void DisplayPage::setDefaultMessage(const string aMessage)
 
 bool DisplayPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
 {
-  infoFlash(aSide); // every keypress revives info
-  if (aNewPressedKeys & keycode_left) {
-    postInfo("go0");
-  }
-  else if (aNewPressedKeys & keycode_middleleft) {
-    postInfo("go1");
-  }
-  else if (aNewPressedKeys & keycode_middleright) {
-    postInfo("go2");
-  }
-  if (aNewPressedKeys & keycode_right) {
-    postInfo("go3");
+  // every keypress revives info
+  if (infoFlash(aSide)) {
+    // info was already on display
+    if (aNewPressedKeys & keycode_left) {
+      postInfo("go0");
+    }
+    else if (aNewPressedKeys & keycode_middleleft) {
+      postInfo("go1");
+    }
+    else if (aNewPressedKeys & keycode_middleright) {
+      postInfo("go2");
+    }
+    if (aNewPressedKeys & keycode_right) {
+      postInfo("go3");
+    }
   }
   return true; // done
 }

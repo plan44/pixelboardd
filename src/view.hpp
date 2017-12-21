@@ -135,6 +135,10 @@ namespace p44 {
     /// @param aAlpha 0=fully transparent, 255=fully opaque
     void setAlpha(int aAlpha);
 
+    /// get current alpha
+    /// @return current alpha value 0=fully transparent=invisible, 255=fully opaque
+    uint8_t getAlpha() { return alpha; };
+
     /// hide (set alpha to 0)
     void hide() { setAlpha(0); };
 

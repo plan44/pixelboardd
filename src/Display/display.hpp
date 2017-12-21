@@ -83,7 +83,7 @@ namespace p44 {
     /// clear entire field
     void clear();
 
-    void infoFlash(int aSide);
+    bool infoFlash(int aSide); // returns true if was already visible before
     void showMessage(const string aMessage);
 
   };
