@@ -397,6 +397,8 @@ void BlocksPage::stop()
     b->block = NULL; // forget it
     ledState[bi] = keycode_none; // LEDs off
   }
+  if (music) music->stop();
+  if (sound) sound->stop();
 }
 
 
@@ -446,6 +448,7 @@ void BlocksPage::startGame(PageMode aMode)
   MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
   stop();
   clear();
+  if (music) music->play(Application::sharedApplication()->resourcePath("sounds/tetris.mod"));
   level = 0;
   score[0] = 0;
   score[1] = 0;
@@ -490,6 +493,7 @@ void BlocksPage::resume()
 
 void BlocksPage::gameOver()
 {
+  if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/gameover.wav"));
   gameState = game_over;
   playfield->setAlpha(128); // dim board a lot
   MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
@@ -539,7 +543,6 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
       }
       else {
         // first player, turn help for her if it is on the far side
-        #warning can't work yet, because stack does not (yet) do transformation
         infoView->setOrientation(aSide==1 ? View::left : View::right);
       }
       // add to acculumator
@@ -576,6 +579,7 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
     }
     else if (aNewPressedKeys & keycode_middleright) {
       drop = true;
+      if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/drop.wav"));
     }
     // movement X is right edge, so need to swap for bottom end keys
     if (aSide==1) movement = -movement;
@@ -708,10 +712,22 @@ void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
     //   - four rows:  1200*(level+1)
     int s=0;
     switch (aRemovedRows) {
-      case 1 : s = 40; break;
-      case 2 : s = 100; break;
-      case 3 : s = 300; break;
-      case 4 : s = 1200; break;
+      case 1 :
+        s = 40;
+        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/1line.wav"));
+        break;
+      case 2 :
+        s = 100;
+        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/2line.wav"));
+        break;
+      case 3 :
+        s = 300;
+        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/3line.wav"));
+        break;
+      case 4 :
+        s = 1200;
+        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/4line.wav"));
+        break;
     }
     s = s *(level+1);
     LOG(LOG_INFO,"Scoring: %d rows removed in level %d -> %d points", aRemovedRows, level, s);

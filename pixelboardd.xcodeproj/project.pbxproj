@@ -47,6 +47,7 @@
 		ED67E7FB1FE41A8900B69250 /* viewanimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED67E7F81FE3FEB700B69250 /* viewanimator.cpp */; };
 		ED8E64661DFDC66F00B66723 /* blocks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED8E64641DFDC66F00B66723 /* blocks.cpp */; };
 		EDA21EE11E0EC201009E276B /* display.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDA21EE01E0EC201009E276B /* display.cpp */; };
+		EDF3B4061FEBD3B0000CBB67 /* sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF3B4041FEBD3AF000CBB67 /* sound.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -147,6 +148,8 @@
 		EDA21EDF1E0EC201009E276B /* display.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = display.hpp; sourceTree = "<group>"; };
 		EDA21EE01E0EC201009E276B /* display.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = display.cpp; sourceTree = "<group>"; };
 		EDF2EA731F473A67008D1DBC /* Makefile.am */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
+		EDF3B4041FEBD3AF000CBB67 /* sound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sound.cpp; sourceTree = "<group>"; };
+		EDF3B4051FEBD3AF000CBB67 /* sound.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sound.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +218,8 @@
 				ED67E7F11FE1773300B69250 /* viewstack.hpp */,
 				ED67E7F81FE3FEB700B69250 /* viewanimator.cpp */,
 				ED67E7F91FE3FEB800B69250 /* viewanimator.hpp */,
+				EDF3B4041FEBD3AF000CBB67 /* sound.cpp */,
+				EDF3B4051FEBD3AF000CBB67 /* sound.hpp */,
 				ED23829B1E117BD000F1FE4F /* pixelpage.cpp */,
 				ED23829C1E117BD000F1FE4F /* pixelpage.hpp */,
 				ED53725F1DFC28D00066FF5A /* pixelboardd_main.cpp */,
@@ -424,6 +429,7 @@
 				ED67E7FB1FE41A8900B69250 /* viewanimator.cpp in Sources */,
 				ED5372A21DFC2CBE0066FF5A /* httpcomm.cpp in Sources */,
 				ED5372AA1DFC2CBE0066FF5A /* mainloop.cpp in Sources */,
+				EDF3B4061FEBD3B0000CBB67 /* sound.cpp in Sources */,
 				ED5372A51DFC2CBE0066FF5A /* jsoncomm.cpp in Sources */,
 				ED2382A51E140D4A00F1FE4F /* textview.cpp in Sources */,
 				ED5372D71DFC9FC90066FF5A /* sqlite3pp.cpp in Sources */,

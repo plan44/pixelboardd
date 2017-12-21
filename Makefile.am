@@ -136,4 +136,6 @@ pixelboardd_SOURCES = \
   src/imageview.hpp \
   src/pixelpage.cpp \
   src/pixelpage.hpp \
+  src/sound.cpp \
+  src/sound.hpp \
   src/pixelboardd_main.cpp

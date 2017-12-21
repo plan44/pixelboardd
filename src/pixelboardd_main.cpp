@@ -72,6 +72,10 @@ class PixelBoardD : public CmdLineApp
   PagesMap pages;
   PixelPagePtr currentPage; ///< the current page
 
+  // sound channels
+  SoundChannelPtr sound;
+  SoundChannelPtr music;
+
   // pages
   DisplayPagePtr displayPage;
   BlocksPagePtr blocksPage;
@@ -100,6 +104,8 @@ public:
       { 0  , "touchreset",     true,  "pinspec;touchboard reset signal" },
       { 0  , "i2cbuslow",      true,  "busno;i2c bus connected to the lower touchboard" },
       { 0  , "i2cbushigh",     true,  "busno;i2c bus connected to the higher touchboard" },
+      { 0  , "sound",          true,  "sound device/volume control name;sound effects output" },
+      { 0  , "music",          true,  "sound device/volume control name;music output" },
       { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
@@ -158,6 +164,15 @@ public:
       getIntOption("defaultmode", m);
       defaultMode = m;
 
+      // sound channels
+      string sounddev;
+      if (getStringOption("sound", sounddev)) {
+        sound = SoundChannelPtr(new SoundChannel(sounddev.c_str()));
+      }
+      if (getStringOption("music", sounddev)) {
+        music = SoundChannelPtr(new SoundChannel(sounddev.c_str()));
+      }
+
       // add pages
       // - display
       displayPage = DisplayPagePtr(new DisplayPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
@@ -170,6 +185,7 @@ public:
       }
       // - blocks
       blocksPage = BlocksPagePtr(new BlocksPage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
+      blocksPage->setSoundChannels(sound, music);
       // - life
       lifePage = LifePagePtr(new LifePage(boost::bind(&PixelBoardD::pageInfoHandler, this, _1, _2)));
 
@@ -394,6 +410,20 @@ public:
         if (aData->get("page", o)) {
           string page = o->stringValue();
           gotoPage(page, mode);
+        }
+      }
+      aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
+      return true;
+    }
+    else if (aUri=="sound") {
+      if (aIsAction) {
+        if (aData->get("music", o)) {
+          // music volume
+          music->setVolume(o->int32Value());
+        }
+        if (aData->get("sound", o)) {
+          // sound volume
+          sound->setVolume(o->int32Value());
         }
       }
       aRequestDoneCB(JsonObjectPtr(), ErrorPtr());

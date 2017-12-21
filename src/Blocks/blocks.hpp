@@ -27,7 +27,7 @@
 #include "imageview.hpp"
 #include "viewstack.hpp"
 #include "viewanimator.hpp"
-
+#include "sound.hpp"
 
 namespace p44 {
 
@@ -205,6 +205,10 @@ namespace p44 {
     BlocksViewPtr playfield;
     TextViewPtr scoretext;
 
+    // sound
+    SoundChannelPtr sound;
+    SoundChannelPtr music;
+
   public :
 
     MLMicroSeconds stepInterval;
@@ -213,6 +217,9 @@ namespace p44 {
 
 
     BlocksPage(PixelPageInfoCB aInfoCallback);
+
+    /// pass sound channels
+    void setSoundChannels(SoundChannelPtr aSound, SoundChannelPtr aMusic) { sound = aSound; music = aMusic; };
 
     /// show
     /// @param aMode in what mode to show the page (0x01=bottom, 0x02=top, 0x03=both)
