@@ -698,6 +698,7 @@ void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
         // light up
         playfield->setColorCodeAt(32, x, y); // row flash
       }
+      if (sound) sound->play(Application::sharedApplication()->resourcePath()+string_format("/sounds/%dline.wav", aRemovedRows+1));
       makeDirty();
       rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom, aRemovedRows), rowKillDelay);
       return;
@@ -712,22 +713,10 @@ void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
     //   - four rows:  1200*(level+1)
     int s=0;
     switch (aRemovedRows) {
-      case 1 :
-        s = 40;
-        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/1line.wav"));
-        break;
-      case 2 :
-        s = 100;
-        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/2line.wav"));
-        break;
-      case 3 :
-        s = 300;
-        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/3line.wav"));
-        break;
-      case 4 :
-        s = 1200;
-        if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/4line.wav"));
-        break;
+      case 1 : s = 40; break;
+      case 2 : s = 100; break;
+      case 3 : s = 300; break;
+      case 4 : s = 1200; break;
     }
     s = s *(level+1);
     LOG(LOG_INFO,"Scoring: %d rows removed in level %d -> %d points", aRemovedRows, level, s);

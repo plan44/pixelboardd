@@ -106,6 +106,8 @@ public:
       { 0  , "i2cbushigh",     true,  "busno;i2c bus connected to the higher touchboard" },
       { 0  , "sound",          true,  "sound device/volume control name;sound effects output" },
       { 0  , "music",          true,  "sound device/volume control name;music output" },
+      { 0  , "soundvol",       true,  "volume;initial sound effects volume" },
+      { 0  , "musicvol",       true,  "volume;initial music volume" },
       { 'u', "upsidedown",     false, "use board upside down" },
       { 0  , "consolekeys",    false, "allow controlling via console keys" },
       { 0  , "notouch",        false, "disable touch pad checking" },
@@ -164,13 +166,20 @@ public:
       getIntOption("defaultmode", m);
       defaultMode = m;
 
-      // sound channels
+      // sound
       string sounddev;
+      int vol;
       if (getStringOption("sound", sounddev)) {
         sound = SoundChannelPtr(new SoundChannel(sounddev.c_str()));
+        if (getIntOption("soundvol", vol)) {
+          sound->setVolume(vol);
+        }
       }
       if (getStringOption("music", sounddev)) {
         music = SoundChannelPtr(new SoundChannel(sounddev.c_str()));
+        if (getIntOption("musicvol", vol)) {
+          music->setVolume(vol);
+        }
       }
 
       // add pages
@@ -416,17 +425,23 @@ public:
       return true;
     }
     else if (aUri=="sound") {
+      JsonObjectPtr answer;
       if (aIsAction) {
-        if (aData->get("music", o)) {
+        // set
+        if (music && aData->get("music", o)) {
           // music volume
           music->setVolume(o->int32Value());
         }
-        if (aData->get("sound", o)) {
+        if (sound && aData->get("sound", o)) {
           // sound volume
           sound->setVolume(o->int32Value());
         }
       }
-      aRequestDoneCB(JsonObjectPtr(), ErrorPtr());
+      // get
+      answer = JsonObject::newObj();
+      if (music) answer->add("music", JsonObject::newInt32(music->getVolume()));
+      if (sound) answer->add("sound", JsonObject::newInt32(sound->getVolume()));
+      aRequestDoneCB(answer, ErrorPtr());
       return true;
     }
     else if (aUri=="display") {
@@ -577,6 +592,7 @@ public:
 
   void keyHandler(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurrentPressed)
   {
+    // if (sound && aNewPressedKeys) sound->play(Application::sharedApplication()->resourcePath("sounds/tap.wav"));
     LOG(LOG_INFO, "Posting key changes from side %d : New: %c%c%c%c - Pressed %c%c%c%c",
       aSide,
       aNewPressedKeys & keycode_left ? 'L' : '-',

@@ -35,7 +35,8 @@ using namespace p44;
 SoundChannel::SoundChannel(const string aDeviceAndVolumeName) :
   deviceAndVolumeName(aDeviceAndVolumeName),
   playerPID(-1),
-  numPlaying(0)
+  numPlaying(0),
+  volume(0)
 {
 }
 
@@ -46,25 +47,35 @@ SoundChannel::~SoundChannel()
 }
 
 
+int SoundChannel::getVolume()
+{
+  return volume;
+}
+
+
 void SoundChannel::setVolume(int aVolume)
 {
-  #if defined(__APPLE__)
-  const char *path = "/bin/echo";
-  #else
-  const char *path = VOLUME_CMD;
-  #endif
-  // amixer -D <devicename> sset <controlname> <value>
-  const char *cmd[] = {
-    path,
-    "sset",
-    deviceAndVolumeName.c_str(),
-    string_format("%d%%", aVolume).c_str(),
-    NULL
-  };
-  MainLoop::currentMainLoop().fork_and_execve(
-    boost::bind(&SoundChannel::volumeUpdated, this, _1),
-    path, (char **)cmd
-  );
+  if (aVolume!=volume) {
+    volume = aVolume;
+    #if defined(__APPLE__)
+    const char *path = "/bin/echo";
+    #else
+    const char *path = VOLUME_CMD;
+    #endif
+    // amixer -D <devicename> sset <controlname> <value>
+    string vol = string_format("%d%%", aVolume);
+    const char *cmd[] = {
+      path,
+      "sset",
+      deviceAndVolumeName.c_str(),
+      vol.c_str(),
+      NULL
+    };
+    MainLoop::currentMainLoop().fork_and_execve(
+      boost::bind(&SoundChannel::volumeUpdated, this, _1),
+      path, (char **)cmd
+    );
+  }
 }
 
 

@@ -32,6 +32,7 @@ namespace p44 {
     string deviceAndVolumeName;
     pid_t playerPID;
     int numPlaying;
+    int volume;
 
   public :
 
@@ -44,6 +45,10 @@ namespace p44 {
     /// set volume
     /// @param aVolume audio volume of this sound channel, 0..100%
     void setVolume(int aVolume);
+
+    /// get volume
+    /// @return current audio volume of this sound channel, 0..100%
+    int getVolume();
 
     /// stop currently playing sound
     /// @note currently, only most recently played sound can be stopped

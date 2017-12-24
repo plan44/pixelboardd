@@ -105,7 +105,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--sound sound --music music"
+            argument = "--sound sound --music music --soundvol 100 --musicvol 70"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
