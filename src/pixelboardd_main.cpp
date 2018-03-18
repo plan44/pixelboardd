@@ -98,7 +98,7 @@ public:
     const char *usageText =
       "Usage: %1$s [options]\n";
     const CmdLineOptionDescriptor options[] = {
-      { 'd', "ledchain",       true,  "device;set device to send LED chain data to" },
+      { 0  , "ledchain",       true,  "device;set device to send LED chain data to" },
       { 0  , "touchsel",       true,  "pinspec;touchboard selection signal" },
       { 0  , "touchdetect",    true,  "pinspec;touchboard touch detect signal" },
       { 0  , "touchreset",     true,  "pinspec;touchboard reset signal" },
@@ -122,6 +122,7 @@ public:
       { 0  , "dontlogerrors",  false, "don't duplicate error messages (see --errlevel) on stdout" },
       { 0  , "deltatstamps",   false, "show timestamp delta between log lines" },
       { 'r', "resourcepath",   true,  "path;path to the images and sounds folders" },
+      { 'd', "datapath",       true,  "path;path to the r/w persistent data" },
       { 'h', "help",           false, "show this text" },
       { 0, NULL } // list terminator
     };

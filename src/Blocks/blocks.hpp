@@ -172,6 +172,15 @@ namespace p44 {
 
 
 
+  class HighScoreEntry
+  {
+    friend class BlocksPage;
+
+    time_t when;
+    string who;
+    int score;
+  };
+
 
   class BlocksPage : public PixelPage
   {
@@ -191,6 +200,10 @@ namespace p44 {
     int score[2]; ///< the score for the players
     int level; ///< the level
 
+    typedef std::vector<HighScoreEntry> HighScores; ///< high scores
+    HighScores highscores;
+
+
     long rowKillTicket;
     long stateChangeTicket;
 
@@ -204,6 +217,7 @@ namespace p44 {
     ImageViewPtr twoSidedView;
     BlocksViewPtr playfield;
     TextViewPtr scoretext;
+    ImageViewPtr playSelect;
 
     // sound
     SoundChannelPtr sound;
@@ -283,6 +297,8 @@ namespace p44 {
     void gameOver();
     void removeRow(int aY, bool aBlockFromBottom, int aRemovedRows);
     void checkRows(bool aBlockFromBottom, int aRemovedRows);
+    void loadHighScores();
+    void saveHighScores();
 
   };
   typedef boost::intrusive_ptr<BlocksPage> BlocksPagePtr;

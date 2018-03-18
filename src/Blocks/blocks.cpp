@@ -22,6 +22,7 @@
 #include "blocks.hpp"
 
 #include "application.hpp"
+#include "time.h"
 
 using namespace p44;
 
@@ -315,6 +316,7 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   rowKillDelay(0.15*Second)
 {
   stop();
+  loadHighScores();
   // game view
   playfield = BlocksViewPtr(new BlocksView);
   sizeViewToPage(playfield);
@@ -355,6 +357,13 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   // score text view
   scoretext = TextViewPtr(new TextView(2, 0, 20, View::down));
   scoretext->setTextColor({255, 128, 0, 255});
+  // play selection
+  playSelect = ImageViewPtr(new ImageView);
+  sizeViewToPage(playSelect);
+  playSelect->loadPNG(Application::sharedApplication()->resourcePath("images/play.png"));
+  playSelect->show();
+  // play selection on top
+  infoView->pushView(playSelect);
   // main stack
   ViewStackPtr mv = ViewStackPtr(new ViewStack());
   sizeViewToPage(mv);
@@ -414,6 +423,7 @@ void BlocksPage::makeReady(bool aNewShow)
 {
   gameState = game_ready;
   infoView->show();
+  playSelect->show();
   playModeAccumulator = 0;
   // show start keys
   ledState[0] = keycode_middleleft; // Turn = start
@@ -491,6 +501,8 @@ void BlocksPage::resume()
 
 
 
+#define MAX_HIGHSCORES 30
+
 void BlocksPage::gameOver()
 {
   if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/gameover.wav"));
@@ -499,8 +511,41 @@ void BlocksPage::gameOver()
   MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
   ledState[0] = keycode_none; // LEDs off
   ledState[1] = keycode_none; // LEDs off
-  scoretext->setText(string_format("%d", score[0]+score[1]), true);
-  scoretext->show(); // show
+  int gamescore = score[0]+score[1];
+  if (gamescore>0) {
+    scoretext->setText(string_format("%d", gamescore), true);
+    scoretext->show(); // show
+    // update highscores
+    HighScores::iterator pos;
+    for (pos = highscores.begin(); pos!=highscores.end(); ++pos) {
+      if (pos->score<gamescore) {
+        // we beat that score at pos
+        break;
+      }
+    }
+    // pos now where we want to insert
+    if (pos!=highscores.end() || highscores.size()<MAX_HIGHSCORES) {
+      // not at the end of the current list, or current list not yet max size: add
+      HighScoreEntry hse;
+      hse.when = time(NULL);
+      hse.score = gamescore;
+      if (score[0]!=0 && score[1]!=0) {
+        hse.who = "Cooperative Game";
+      }
+      else {
+        hse.who = string_format("Player %d", score[1]!=0 ? 1 : 0);
+      }
+      highscores.insert(pos, hse);
+      // limit size of highscores (in case we inserted in the middle, one lower entry might be too much)
+      if (highscores.size()>MAX_HIGHSCORES) {
+        highscores.erase(highscores.begin()+MAX_HIGHSCORES, highscores.end());
+      }
+      saveHighScores();
+    }
+    // done, avoid re-saving highscores
+    score[0]=0;
+    score[1]=0;
+  }
   makeDirty();
 }
 
@@ -533,6 +578,7 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
   else if (gameState==game_ready) {
     // turn starts (after 2 seconds timeout), others exit game
     if (aNewPressedKeys & keycode_middleleft) {
+      playSelect->hide();
       PageMode newMode = aSide==1 ? pagemode_controls2 : pagemode_controls1;
       if (playModeAccumulator!=0) {
         // at least one player has already joined
@@ -549,7 +595,7 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
       playModeAccumulator |= newMode;
       ledState[aSide==1 ? 1 : 0] = keycode_all; // immediate feedback: all 4 keys on
       // but start with a little delay so other player can also join
-      MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 3*Second);
+      MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 5*Second);
     }
     else if (aNewPressedKeys) {
       postInfo("quit");
@@ -794,4 +840,50 @@ void BlocksPage::dropBlock(bool aLower)
     b->droppedsteps = 0;
   }
 }
+
+
+void BlocksPage::saveHighScores()
+{
+  JsonObjectPtr hs = JsonObject::newArray();
+  for (HighScores::iterator pos = highscores.begin(); pos!=highscores.end(); ++pos) {
+    JsonObjectPtr hse = JsonObject::newObj();
+    hse->add("score", JsonObject::newInt32(pos->score));
+    hse->add("who", JsonObject::newString(pos->who));
+    hse->add("when", JsonObject::newInt64(pos->when));
+    hs->arrayAppend(hse);
+  }
+  ErrorPtr err = hs->saveToFile(Application::sharedApplication()->dataPath("blocks_highscores.json").c_str());
+  if (!Error::isOK(err)) {
+    LOG(LOG_ERR, "Cannot save highscores: %s", err->description().c_str());
+  }
+}
+
+
+void BlocksPage::loadHighScores()
+{
+  ErrorPtr err;
+  highscores.clear();
+  JsonObjectPtr hs = JsonObject::objFromFile(Application::sharedApplication()->dataPath("blocks_highscores.json").c_str(), &err);
+  if (!Error::isOK(err)) {
+    LOG(LOG_ERR, "Cannot load highscores: %s", err->description().c_str());
+  }
+  else if (hs) {
+    for (int i=0; i<hs->arrayLength(); i++) {
+      JsonObjectPtr hse = hs->arrayGet(i);
+      HighScoreEntry he;
+      JsonObjectPtr o;
+      if (hse->get("score", o)) he.score = o->int32Value();
+      if (hse->get("who", o)) he.who = o->stringValue();
+      if (hse->get("score", o)) he.when = o->int64Value();
+      highscores.push_back(he);
+    }
+  }
+}
+
+
+
+
+
+
+
 

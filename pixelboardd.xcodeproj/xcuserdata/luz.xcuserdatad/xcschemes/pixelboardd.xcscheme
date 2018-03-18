@@ -81,6 +81,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--datapath /tmp"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--image /Volumes/CaseSens/lede-master/feeds/plan44/pixelboard-config/files/www/images/default.png"
             isEnabled = "YES">
          </CommandLineArgument>
