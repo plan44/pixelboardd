@@ -309,8 +309,6 @@ BlocksPage::BlocksPage(PixelPageInfoCB aInfoCallback) :
   gameState(game_ready),
   gameMode(0),
   playModeAccumulator(0),
-  rowKillTicket(0),
-  stateChangeTicket(0),
   stepInterval(0.7*Second),
   dropStepInterval(0.05*Second),
   rowKillDelay(0.15*Second)
@@ -396,8 +394,8 @@ void BlocksPage::clear()
 
 void BlocksPage::stop()
 {
-  MainLoop::currentMainLoop().cancelExecutionTicket(rowKillTicket);
-  MainLoop::currentMainLoop().cancelExecutionTicket(stateChangeTicket);
+  rowKillTicket.cancel();
+  stateChangeTicket.cancel();
   // remove block if any is still running
   for (int bi=0; bi<2; bi++) {
     // clear runners
@@ -720,7 +718,7 @@ void BlocksPage::removeRow(int aY, bool aBlockFromBottom, int aRemovedRows)
   // count
   aRemovedRows++;
   // continue checking
-  rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom, aRemovedRows), rowKillDelay);
+  rowKillTicket.executeOnce(boost::bind(&BlocksPage::checkRows, this, aBlockFromBottom, aRemovedRows), rowKillDelay);
   makeDirty();
 }
 
@@ -746,7 +744,7 @@ void BlocksPage::checkRows(bool aBlockFromBottom, int aRemovedRows)
       }
       if (sound) sound->play(Application::sharedApplication()->resourcePath()+string_format("/sounds/%dline.wav", aRemovedRows+1));
       makeDirty();
-      rowKillTicket = MainLoop::currentMainLoop().executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom, aRemovedRows), rowKillDelay);
+      rowKillTicket.executeOnce(boost::bind(&BlocksPage::removeRow, this, y, aBlockFromBottom, aRemovedRows), rowKillDelay);
       return;
     }
   }

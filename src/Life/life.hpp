@@ -38,7 +38,7 @@ namespace p44 {
 
     PageMode defaultMode;
 
-    long generationTicket;
+    MLTicket generationTicket;
 
     int dynamics;
     int population;

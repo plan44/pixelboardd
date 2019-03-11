@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED0AF06C22365A4B00E3E7FC /* civetweb.c in Sources */ = {isa = PBXBuildFile; fileRef = ED0AF06822365A4B00E3E7FC /* civetweb.c */; };
 		ED23829E1E1190F500F1FE4F /* pixelpage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED23829B1E117BD000F1FE4F /* pixelpage.cpp */; };
 		ED2382A51E140D4A00F1FE4F /* textview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED2382A31E140D4A00F1FE4F /* textview.cpp */; };
 		ED43A9691ECB8B1B00FBC0FF /* life.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED43A9671ECB8B1B00FBC0FF /* life.cpp */; };
@@ -36,7 +37,6 @@
 		ED5372B11DFC2CBE0066FF5A /* spi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372951DFC2CBE0066FF5A /* spi.cpp */; };
 		ED5372B21DFC2CBE0066FF5A /* sqlite3persistence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372971DFC2CBE0066FF5A /* sqlite3persistence.cpp */; };
 		ED5372B31DFC2CBE0066FF5A /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372991DFC2CBE0066FF5A /* utils.cpp */; };
-		ED5372D51DFC9F720066FF5A /* mongoose.c in Sources */ = {isa = PBXBuildFile; fileRef = ED5372B71DFC9F650066FF5A /* mongoose.c */; };
 		ED5372D61DFC9FC60066FF5A /* sqlite3ppext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372CB1DFC9F650066FF5A /* sqlite3ppext.cpp */; };
 		ED5372D71DFC9FC90066FF5A /* sqlite3pp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5372C91DFC9F650066FF5A /* sqlite3pp.cpp */; };
 		ED5372DA1DFCA0CC0066FF5A /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ED5372D91DFCA0CC0066FF5A /* libsqlite3.tbd */; };
@@ -63,6 +63,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED0AF06422365A4B00E3E7FC /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
+		ED0AF06522365A4B00E3E7FC /* civetweb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = civetweb.h; sourceTree = "<group>"; };
+		ED0AF06622365A4B00E3E7FC /* openssl_hostname_validation.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = openssl_hostname_validation.inl; sourceTree = "<group>"; };
+		ED0AF06722365A4B00E3E7FC /* hostcheck.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = hostcheck.inl; sourceTree = "<group>"; };
+		ED0AF06822365A4B00E3E7FC /* civetweb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = civetweb.c; sourceTree = "<group>"; };
+		ED0AF06922365A4B00E3E7FC /* md5.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = md5.inl; sourceTree = "<group>"; };
+		ED0AF06A22365A4B00E3E7FC /* sha1.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sha1.inl; sourceTree = "<group>"; };
+		ED0AF06B22365A4B00E3E7FC /* handle_form.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = handle_form.inl; sourceTree = "<group>"; };
 		ED23829B1E117BD000F1FE4F /* pixelpage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pixelpage.cpp; sourceTree = "<group>"; };
 		ED23829C1E117BD000F1FE4F /* pixelpage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pixelpage.hpp; sourceTree = "<group>"; };
 		ED2382A01E12B55E00F1FE4F /* torch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = torch.cpp; sourceTree = "<group>"; };
@@ -125,9 +133,6 @@
 		ED5372981DFC2CBE0066FF5A /* sqlite3persistence.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sqlite3persistence.hpp; sourceTree = "<group>"; };
 		ED5372991DFC2CBE0066FF5A /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
 		ED53729A1DFC2CBE0066FF5A /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
-		ED5372B61DFC9F650066FF5A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		ED5372B71DFC9F650066FF5A /* mongoose.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mongoose.c; sourceTree = "<group>"; };
-		ED5372B81DFC9F650066FF5A /* mongoose.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mongoose.h; sourceTree = "<group>"; };
 		ED5372C91DFC9F650066FF5A /* sqlite3pp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sqlite3pp.cpp; sourceTree = "<group>"; };
 		ED5372CA1DFC9F650066FF5A /* sqlite3pp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sqlite3pp.h; sourceTree = "<group>"; };
 		ED5372CB1DFC9F650066FF5A /* sqlite3ppext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sqlite3ppext.cpp; sourceTree = "<group>"; };
@@ -147,6 +152,7 @@
 		ED8E64651DFDC66F00B66723 /* blocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = blocks.hpp; sourceTree = "<group>"; };
 		EDA21EDF1E0EC201009E276B /* display.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = display.hpp; sourceTree = "<group>"; };
 		EDA21EE01E0EC201009E276B /* display.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = display.cpp; sourceTree = "<group>"; };
+		EDA91F1B213DCB3E00136117 /* configure.ac */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = configure.ac; sourceTree = "<group>"; };
 		EDF2EA731F473A67008D1DBC /* Makefile.am */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
 		EDF3B4041FEBD3AF000CBB67 /* sound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sound.cpp; sourceTree = "<group>"; };
 		EDF3B4051FEBD3AF000CBB67 /* sound.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sound.hpp; sourceTree = "<group>"; };
@@ -164,6 +170,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED0AF06322365A4B00E3E7FC /* civetweb */ = {
+			isa = PBXGroup;
+			children = (
+				ED0AF06422365A4B00E3E7FC /* LICENSE.md */,
+				ED0AF06522365A4B00E3E7FC /* civetweb.h */,
+				ED0AF06622365A4B00E3E7FC /* openssl_hostname_validation.inl */,
+				ED0AF06722365A4B00E3E7FC /* hostcheck.inl */,
+				ED0AF06822365A4B00E3E7FC /* civetweb.c */,
+				ED0AF06922365A4B00E3E7FC /* md5.inl */,
+				ED0AF06A22365A4B00E3E7FC /* sha1.inl */,
+				ED0AF06B22365A4B00E3E7FC /* handle_form.inl */,
+			);
+			path = civetweb;
+			sourceTree = "<group>";
+		};
 		ED23829F1E12B4AF00F1FE4F /* Torch */ = {
 			isa = PBXGroup;
 			children = (
@@ -185,6 +206,7 @@
 		ED5372531DFC28D00066FF5A = {
 			isa = PBXGroup;
 			children = (
+				EDA91F1B213DCB3E00136117 /* configure.ac */,
 				EDF2EA731F473A67008D1DBC /* Makefile.am */,
 				ED53725E1DFC28D00066FF5A /* src */,
 				ED53725D1DFC28D00066FF5A /* Products */,
@@ -292,20 +314,10 @@
 		ED5372B41DFC9F650066FF5A /* thirdparty */ = {
 			isa = PBXGroup;
 			children = (
-				ED5372B51DFC9F650066FF5A /* mongoose */,
+				ED0AF06322365A4B00E3E7FC /* civetweb */,
 				ED5372C81DFC9F650066FF5A /* sqlite3pp */,
 			);
 			path = thirdparty;
-			sourceTree = "<group>";
-		};
-		ED5372B51DFC9F650066FF5A /* mongoose */ = {
-			isa = PBXGroup;
-			children = (
-				ED5372B61DFC9F650066FF5A /* LICENSE */,
-				ED5372B71DFC9F650066FF5A /* mongoose.c */,
-				ED5372B81DFC9F650066FF5A /* mongoose.h */,
-			);
-			path = mongoose;
 			sourceTree = "<group>";
 		};
 		ED5372C81DFC9F650066FF5A /* sqlite3pp */ = {
@@ -412,7 +424,6 @@
 				ED53729C1DFC2CBE0066FF5A /* colorutils.cpp in Sources */,
 				ED53729F1DFC2CBE0066FF5A /* error.cpp in Sources */,
 				ED5372B21DFC2CBE0066FF5A /* sqlite3persistence.cpp in Sources */,
-				ED5372D51DFC9F720066FF5A /* mongoose.c in Sources */,
 				ED5372D61DFC9FC60066FF5A /* sqlite3ppext.cpp in Sources */,
 				ED8E64661DFDC66F00B66723 /* blocks.cpp in Sources */,
 				ED5372A61DFC2CBE0066FF5A /* jsonobject.cpp in Sources */,
@@ -436,6 +447,7 @@
 				ED67E7F31FE18D0600B69250 /* viewstack.cpp in Sources */,
 				ED5372A91DFC2CBE0066FF5A /* logger.cpp in Sources */,
 				ED5372AF1DFC2CBE0066FF5A /* serialqueue.cpp in Sources */,
+				ED0AF06C22365A4B00E3E7FC /* civetweb.c in Sources */,
 				ED5372DD1DFCA1FF0066FF5A /* ledchaincomm.cpp in Sources */,
 				ED5372A31DFC2CBE0066FF5A /* i2c.cpp in Sources */,
 				ED5372A01DFC2CBE0066FF5A /* fdcomm.cpp in Sources */,
@@ -494,8 +506,12 @@
 					"$(PROJECT_DIR)/src",
 					"$(PROJECT_DIR)/src/p44utils",
 					"$(PROJECT_DIR)/src/p44utils/thirdparty",
+					/usr/local/Cellar/openssl/1.0.2k/include,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/usr/local/Cellar/openssl/1.0.2p/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -547,8 +563,12 @@
 					"$(PROJECT_DIR)/src",
 					"$(PROJECT_DIR)/src/p44utils",
 					"$(PROJECT_DIR)/src/p44utils/thirdparty",
+					/usr/local/Cellar/openssl/1.0.2k/include,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/usr/local/Cellar/openssl/1.0.2p/lib,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (

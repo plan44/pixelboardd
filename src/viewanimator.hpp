@@ -67,8 +67,8 @@ namespace p44 {
     /// clear all steps
     virtual void clear();
 
-    /// push view onto top of stack
-    /// @param aView the view to push in front of all other views
+    /// add animation step view to list of animation steps
+    /// @param aView the view to add
     void pushStep(ViewPtr aView, MLMicroSeconds aShowTime, MLMicroSeconds aFadeInTime=0, MLMicroSeconds aFadeOutTime=0);
 
     /// start animating

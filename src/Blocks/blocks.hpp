@@ -204,8 +204,8 @@ namespace p44 {
     HighScores highscores;
 
 
-    long rowKillTicket;
-    long stateChangeTicket;
+    MLTicket rowKillTicket;
+    MLTicket stateChangeTicket;
 
     uint8_t ledState[2];
 

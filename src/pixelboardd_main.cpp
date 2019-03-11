@@ -71,6 +71,8 @@ class PixelBoardD : public CmdLineApp
   PageMode defaultMode;
   PagesMap pages;
   PixelPagePtr currentPage; ///< the current page
+  MLTicket stepTicket;
+  MLTicket startDelayTicket;
 
   // sound channels
   SoundChannelPtr sound;
@@ -308,8 +310,8 @@ public:
     srand((unsigned)MainLoop::currentMainLoop().now()*4223);
     display->begin();
     display->show();
-    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::step, this, _1));
-    MainLoop::currentMainLoop().executeOnce(boost::bind(&PixelBoardD::gotoPage, this, defaultPageName, defaultMode), 2*Second);
+    stepTicket.executeOnce(boost::bind(&PixelBoardD::step, this, _1));
+    startDelayTicket.executeOnce(boost::bind(&PixelBoardD::gotoPage, this, defaultPageName, defaultMode), 2*Second);
   }
 
 

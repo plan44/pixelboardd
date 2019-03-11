@@ -31,7 +31,6 @@ LifePage::LifePage(PixelPageInfoCB aInfoCallback) :
   inherited("life", aInfoCallback),
   defaultMode(0x01),
   generationInterval(777*MilliSecond),
-  generationTicket(0),
   staticcount(0)
 {
   stop();
@@ -55,7 +54,7 @@ void LifePage::clear()
 
 void LifePage::stop()
 {
-  MainLoop::currentMainLoop().cancelExecutionTicket(generationTicket);
+  generationTicket.cancel();
 }
 
 
@@ -108,7 +107,7 @@ void LifePage::nextGeneration()
 
 void LifePage::timeNext()
 {
-  MainLoop::currentMainLoop().executeTicketOnce(generationTicket,boost::bind(&LifePage::nextGeneration, this), generationInterval);
+  generationTicket.executeOnce(boost::bind(&LifePage::nextGeneration, this), generationInterval);
 }
 
 
