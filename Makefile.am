@@ -24,7 +24,7 @@ pixelboardd_LDADD = $(JSONC_LIBS) $(PTHREAD_LIBS) $(SQLITE3_LIBS) $(PNG_LIBS)
 
 pixelboardd_CXXFLAGS = \
   -I ${srcdir}/src/p44utils \
-  -I ${srcdir}/src/p44utils/thirdparty/mongoose \
+  -I ${srcdir}/src/p44utils/thirdparty/civetweb \
   -I ${srcdir}/src/p44utils/thirdparty \
   -I ${srcdir}/src \
   -I ${srcdir}/src/Blocks \
@@ -113,8 +113,13 @@ pixelboardd_SOURCES = \
   src/p44utils/thirdparty/sqlite3pp/sqlite3pp.h \
   src/p44utils/thirdparty/sqlite3pp/sqlite3ppext.cpp \
   src/p44utils/thirdparty/sqlite3pp/sqlite3ppext.h \
-  src/p44utils/thirdparty/mongoose/mongoose.c \
-  src/p44utils/thirdparty/mongoose/mongoose.h \
+  src/p44utils/thirdparty/civetweb/civetweb.c \
+  src/p44utils/thirdparty/civetweb/civetweb.h \
+  src/p44utils/thirdparty/civetweb/handle_form.inl \
+  src/p44utils/thirdparty/civetweb/md5.inl \
+  src/p44utils/thirdparty/civetweb/sha1.inl \
+  src/p44utils/thirdparty/civetweb/hostcheck.inl \
+  src/p44utils/thirdparty/civetweb/openssl_hostname_validation.inl \
   src/p44utils/p44utils_common.hpp \
   src/Blocks/blocks.cpp \
   src/Blocks/blocks.hpp \
