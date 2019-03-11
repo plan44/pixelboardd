@@ -123,6 +123,7 @@ public:
       { 0  , "deltatstamps",   false, "show timestamp delta between log lines" },
       { 'r', "resourcepath",   true,  "path;path to the images and sounds folders" },
       { 'd', "datapath",       true,  "path;path to the r/w persistent data" },
+      { 'V', "version",        false, "show version" },
       { 'h', "help",           false, "show this text" },
       { 0, NULL } // list terminator
     };

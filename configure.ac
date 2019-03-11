@@ -1,4 +1,4 @@
-AC_INIT([pixelboardd], [0.1], [luz@plan44.ch], [pixelboardd], [http://www.plan44.ch/])
+AC_INIT([pixelboardd], [0.14], [luz@plan44.ch], [pixelboardd], [http://www.plan44.ch/])
 AC_PREREQ([2.59])
 
 AC_CONFIG_AUX_DIR(configure_aux)
