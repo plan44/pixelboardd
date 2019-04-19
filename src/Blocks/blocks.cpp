@@ -506,7 +506,7 @@ void BlocksPage::gameOver()
   if (sound) sound->play(Application::sharedApplication()->resourcePath("sounds/gameover.wav"));
   gameState = game_over;
   playfield->setAlpha(128); // dim board a lot
-  MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 5*Second);
+  MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::makeReady, this, false), 10*Second);
   ledState[0] = keycode_none; // LEDs off
   ledState[1] = keycode_none; // LEDs off
   int gamescore = score[0]+score[1];
@@ -574,10 +574,13 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
     }
   }
   else if (gameState==game_ready) {
-    // turn starts (after 2 seconds timeout), others exit game
-    if (aNewPressedKeys & keycode_middleleft) {
+    // turn starts (after a timeout), others exit game
+    PageMode newMode = aSide==1 ? pagemode_controls2 : pagemode_controls1;
+    if (
+      (aNewPressedKeys & keycode_middleleft) &&
+      ((playModeAccumulator & newMode)==0) // mode selected is actually new
+    ) {
       playSelect->hide();
-      PageMode newMode = aSide==1 ? pagemode_controls2 : pagemode_controls1;
       if (playModeAccumulator!=0) {
         // at least one player has already joined
         if ((playModeAccumulator & newMode)==0) {
@@ -595,7 +598,11 @@ bool BlocksPage::handleKey(int aSide, KeyCodes aNewPressedKeys, KeyCodes aCurren
       // but start with a little delay so other player can also join
       MainLoop::currentMainLoop().executeTicketOnce(stateChangeTicket,boost::bind(&BlocksPage::startAccTimeout, this), 5*Second);
     }
-    else if (aNewPressedKeys) {
+    else if (
+      (aNewPressedKeys & keycode_outer) &&
+      (aCurrentPressed & keycode_outer)==keycode_outer
+    ) {
+      // both outer keys pressed can quit now, everything else is ignored
       postInfo("quit");
     }
   }

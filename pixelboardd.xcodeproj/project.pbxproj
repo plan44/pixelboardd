@@ -397,6 +397,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = ED5372531DFC28D00066FF5A;
@@ -506,11 +507,11 @@
 					"$(PROJECT_DIR)/src",
 					"$(PROJECT_DIR)/src/p44utils",
 					"$(PROJECT_DIR)/src/p44utils/thirdparty",
-					/usr/local/Cellar/openssl/1.0.2k/include,
+					/usr/local/Cellar/openssl/1.0.2q/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
-					/usr/local/Cellar/openssl/1.0.2p/lib,
+					/usr/local/Cellar/openssl/1.0.2q/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -563,11 +564,11 @@
 					"$(PROJECT_DIR)/src",
 					"$(PROJECT_DIR)/src/p44utils",
 					"$(PROJECT_DIR)/src/p44utils/thirdparty",
-					/usr/local/Cellar/openssl/1.0.2k/include,
+					/usr/local/Cellar/openssl/1.0.2q/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
-					/usr/local/Cellar/openssl/1.0.2p/lib,
+					/usr/local/Cellar/openssl/1.0.2q/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
